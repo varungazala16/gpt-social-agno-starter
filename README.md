@@ -20,6 +20,7 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 - **Icons**: Lucide React
 - **Video Libraries**: Remotion Player & CLI
 - **UI Framework**: Preline UI patterns
+- **Component Documentation**: Storybook 9.1.10
 
 ## Getting Started
 
@@ -43,6 +44,20 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+### Running Storybook
+
+Storybook provides an isolated environment for developing and testing UI components.
+
+```bash
+# Run Storybook in development mode
+npm run storybook
+
+# Build Storybook for production
+npm run build-storybook
+```
+
+Open [http://localhost:6006](http://localhost:6006) to view Storybook.
 
 ### Building for Production
 
@@ -96,7 +111,12 @@ gpt.social/
 │   ├── VideoUpload.tsx       # File upload component
 │   ├── VideoRecorder.tsx     # Video recording component
 │   ├── VideoEditor.tsx       # Video editing component
-│   └── VideoGallery.tsx      # Video gallery grid
+│   ├── VideoGallery.tsx      # Video gallery grid
+│   └── *.stories.tsx         # Storybook stories for components
+├── .storybook/
+│   ├── main.ts               # Storybook configuration
+│   └── preview.ts            # Global Storybook settings
+├── stories/                  # Example Storybook stories
 ├── actions/
 │   └── video.ts              # Server actions for video operations
 ├── lib/
@@ -135,6 +155,26 @@ The application is built with a mobile-first approach:
 - Safari (latest)
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
+## Storybook
+
+This project includes Storybook for component development and documentation. All components have interactive stories that allow you to:
+
+- View components in isolation
+- Test different component states and props
+- Explore component documentation
+- Develop components without running the full application
+
+### Available Stories
+
+- **Modal** - Demonstrates modal dialogs with various configurations
+- **VideoPlayer** - Shows video player with different sizes and sources
+- **VideoUpload** - Upload interface with file handling
+- **VideoRecorder** - Video recording interface (requires camera permissions)
+- **VideoEditor** - Video editing modal with trim functionality
+- **VideoGallery** - Grid layout of uploaded videos
+
+Run `npm run storybook` to explore all component variations.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -149,4 +189,5 @@ ISC
 - Styled with Tailwind CSS
 - UI patterns from Preline
 - Icons from Lucide React
+- Component documentation with Storybook 9
 
