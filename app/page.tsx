@@ -33,7 +33,7 @@ export default function Home() {
   ]
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="container mx-auto px-4 py-6">
@@ -76,7 +76,7 @@ export default function Home() {
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {activeTab === 'gallery' && (
             <div className="space-y-6">
@@ -155,16 +155,16 @@ export default function Home() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-12">
+      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
         <div className="container mx-auto px-4 py-6">
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Built with Next.js 15.5, Tailwind CSS, and Preline UI
           </p>
         </div>
       </footer>
-    </main>
+    </div>
   )
 }
