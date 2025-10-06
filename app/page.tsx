@@ -1,19 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Upload, Video, Film, Library } from 'lucide-react'
+import { Upload, Video, Library } from 'lucide-react'
 import { VideoUpload } from '@/components/VideoUpload'
 import { VideoRecorder } from '@/components/VideoRecorder'
 import { VideoGallery } from '@/components/VideoGallery'
 import { VideoEditor } from '@/components/VideoEditor'
 import { cn } from '@/lib/utils'
 
-type Tab = 'upload' | 'record' | 'edit' | 'gallery'
+type Tab = 'upload' | 'record' | 'gallery'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('gallery')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedVideoForEdit, setSelectedVideoForEdit] = useState<string | null>(null)
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
 
   const handleUploadSuccess = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -27,14 +28,18 @@ export default function Home() {
 
   const handleEditVideo = (url: string) => {
     setSelectedVideoForEdit(url)
-    setActiveTab('edit')
+    setIsEditorOpen(true)
+  }
+
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false)
+    setSelectedVideoForEdit(null)
   }
 
   const tabs = [
     { id: 'gallery' as Tab, label: 'Gallery', icon: Library },
     { id: 'upload' as Tab, label: 'Upload', icon: Upload },
     { id: 'record' as Tab, label: 'Record', icon: Video },
-    { id: 'edit' as Tab, label: 'Edit', icon: Film },
   ]
 
   return (
@@ -117,35 +122,17 @@ export default function Home() {
               <VideoRecorder onRecordingComplete={handleRecordingComplete} />
             </div>
           )}
-
-          {activeTab === 'edit' && (
-            <div className="max-w-4xl mx-auto space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Edit Video
-              </h2>
-              
-              {!selectedVideoForEdit ? (
-                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
-                  <Film className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Select a video from the gallery to edit
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <button
-                    onClick={() => setSelectedVideoForEdit(null)}
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-medium"
-                  >
-                    ← Back to selection
-                  </button>
-                  <VideoEditor src={selectedVideoForEdit} />
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </main>
+
+      {/* Video Editor Modal */}
+      {selectedVideoForEdit && (
+        <VideoEditor
+          src={selectedVideoForEdit}
+          isOpen={isEditorOpen}
+          onClose={handleCloseEditor}
+        />
+      )}
 
       {/* Footer */}
       <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 mt-auto">
