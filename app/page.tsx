@@ -25,6 +25,11 @@ export default function Home() {
     setActiveTab('gallery')
   }
 
+  const handleEditVideo = (url: string) => {
+    setSelectedVideoForEdit(url)
+    setActiveTab('edit')
+  }
+
   const tabs = [
     { id: 'gallery' as Tab, label: 'Gallery', icon: Library },
     { id: 'upload' as Tab, label: 'Upload', icon: Upload },
@@ -91,7 +96,7 @@ export default function Home() {
                   Refresh
                 </button>
               </div>
-              <VideoGallery refreshTrigger={refreshTrigger} />
+              <VideoGallery refreshTrigger={refreshTrigger} onEditVideo={handleEditVideo} />
             </div>
           )}
 
@@ -123,23 +128,8 @@ export default function Home() {
                 <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-lg">
                   <Film className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Select a video from the gallery to edit, or enter a video URL
+                    Select a video from the gallery to edit
                   </p>
-                  <div className="max-w-md mx-auto">
-                    <input
-                      type="text"
-                      placeholder="Enter video URL..."
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          const value = (e.target as HTMLInputElement).value
-                          if (value) {
-                            setSelectedVideoForEdit(value)
-                          }
-                        }
-                      }}
-                    />
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
