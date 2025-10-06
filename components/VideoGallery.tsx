@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Trash2, Loader2, Download, Film } from 'lucide-react'
 import { getVideos, deleteVideo } from '@/actions/video'
 import { VideoPlayer } from './VideoPlayer'
+import { ConfirmDialog } from './ConfirmDialog'
 import { cn } from '@/lib/utils'
 
 interface Video {
@@ -22,6 +23,10 @@ export function VideoGallery({ refreshTrigger, className, onEditVideo }: VideoGa
   const [videos, setVideos] = useState<Video[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmDialog, setConfirmDialog] = useState<{ isOpen: boolean; filename: string }>({
+    isOpen: false,
+    filename: ''
+  })
 
   const loadVideos = async () => {
     setIsLoading(true)
@@ -37,8 +42,11 @@ export function VideoGallery({ refreshTrigger, className, onEditVideo }: VideoGa
   }, [refreshTrigger])
 
   const handleDelete = async (filename: string) => {
-    if (!confirm('Are you sure you want to delete this video?')) return
+    setConfirmDialog({ isOpen: true, filename })
+  }
 
+  const confirmDelete = async () => {
+    const filename = confirmDialog.filename
     setDeletingId(filename)
     const result = await deleteVideo(filename)
     
@@ -134,6 +142,16 @@ export function VideoGallery({ refreshTrigger, className, onEditVideo }: VideoGa
           </div>
         </div>
       ))}
+
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        onClose={() => setConfirmDialog({ isOpen: false, filename: '' })}
+        onConfirm={confirmDelete}
+        title="Delete Video"
+        message="Are you sure you want to delete this video? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   )
 }

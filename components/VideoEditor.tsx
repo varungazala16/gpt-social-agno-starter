@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { Scissors, Download, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Modal } from './Modal'
+import { AlertDialog } from './AlertDialog'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
 import { uploadVideo } from '@/actions/video'
@@ -31,6 +32,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
   const [loadingFFmpeg, setLoadingFFmpeg] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [trimmedVideoBlob, setTrimmedVideoBlob] = useState<Blob | null>(null)
+  const [alertDialog, setAlertDialog] = useState<{ isOpen: boolean; title: string; message: string; variant: 'info' | 'error' | 'success' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info'
+  })
 
   useEffect(() => {
     if (isOpen && trimMethod === 'ffmpeg' && !ffmpegLoaded && !loadingFFmpeg) {
@@ -61,7 +68,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       setFfmpegLoaded(true)
     } catch (error) {
       console.error('Failed to load FFmpeg:', error)
-      alert('Failed to load video processing library. Please refresh the page and try again.')
+      setAlertDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to load video processing library. Please refresh the page and try again.',
+        variant: 'error'
+      })
     } finally {
       setLoadingFFmpeg(false)
     }
@@ -77,7 +89,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
 
   const trimWithFFmpeg = async () => {
     if (!ffmpegRef.current || !ffmpegLoaded) {
-      alert('FFmpeg is not loaded yet. Please wait and try again.')
+      setAlertDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'FFmpeg is not loaded yet. Please wait and try again.',
+        variant: 'error'
+      })
       return
     }
 
@@ -113,7 +130,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       await ffmpeg.deleteFile('output.mp4')
     } catch (error) {
       console.error('FFmpeg trim error:', error)
-      alert('Failed to trim video with FFmpeg. Please try again.')
+      setAlertDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to trim video with FFmpeg. Please try again.',
+        variant: 'error'
+      })
     }
   }
 
@@ -175,7 +197,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       drawFrame()
     } catch (error) {
       console.error('MediaRecorder trim error:', error)
-      alert('Failed to process video. Your browser may not support client-side video trimming.')
+      setAlertDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to process video. Your browser may not support client-side video trimming.',
+        variant: 'error'
+      })
     }
   }
 
@@ -218,7 +245,12 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       const result = await uploadVideo(formData)
 
       if (result.success) {
-        alert('Trimmed video saved successfully!')
+        setAlertDialog({
+          isOpen: true,
+          title: 'Success',
+          message: 'Trimmed video saved successfully!',
+          variant: 'success'
+        })
         setShowInfoModal(false)
         setTrimmedVideoBlob(null)
         onClose()
@@ -226,11 +258,21 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
           onSaveComplete()
         }
       } else {
-        alert('Failed to save trimmed video: ' + result.error)
+        setAlertDialog({
+          isOpen: true,
+          title: 'Error',
+          message: 'Failed to save trimmed video: ' + result.error,
+          variant: 'error'
+        })
       }
     } catch (error) {
       console.error('Save error:', error)
-      alert('Failed to save trimmed video')
+      setAlertDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to save trimmed video',
+        variant: 'error'
+      })
     } finally {
       setIsProcessing(false)
     }
@@ -449,6 +491,14 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
           </div>
         </div>
       </Modal>
+
+      <AlertDialog
+        isOpen={alertDialog.isOpen}
+        onClose={() => setAlertDialog({ ...alertDialog, isOpen: false })}
+        title={alertDialog.title}
+        message={alertDialog.message}
+        variant={alertDialog.variant}
+      />
     </>
   )
 }
