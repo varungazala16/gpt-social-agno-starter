@@ -1,24 +1,71 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { Scissors, Download, Loader2, AlertCircle } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Scissors, Download, Loader2, AlertCircle, Upload } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Modal } from './Modal'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { fetchFile, toBlobURL } from '@ffmpeg/util'
+import { uploadVideo } from '@/actions/video'
+
+type TrimMethod = 'ffmpeg' | 'mediarecorder'
 
 interface VideoEditorProps {
   src: string
   className?: string
   isOpen: boolean
   onClose: () => void
+  onSaveComplete?: () => void
 }
 
-export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProps) {
+export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }: VideoEditorProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const ffmpegRef = useRef<FFmpeg | null>(null)
   const [startTime, setStartTime] = useState(0)
   const [endTime, setEndTime] = useState(0)
   const [duration, setDuration] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
   const [showInfoModal, setShowInfoModal] = useState(false)
+  const [trimMethod, setTrimMethod] = useState<TrimMethod>('ffmpeg')
+  const [ffmpegLoaded, setFfmpegLoaded] = useState(false)
+  const [loadingFFmpeg, setLoadingFFmpeg] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState(0)
+  const [trimmedVideoBlob, setTrimmedVideoBlob] = useState<Blob | null>(null)
+
+  useEffect(() => {
+    if (isOpen && trimMethod === 'ffmpeg' && !ffmpegLoaded && !loadingFFmpeg) {
+      loadFFmpeg()
+    }
+  }, [isOpen, trimMethod, ffmpegLoaded, loadingFFmpeg])
+
+  const loadFFmpeg = async () => {
+    try {
+      setLoadingFFmpeg(true)
+      const ffmpeg = new FFmpeg()
+
+      ffmpeg.on('log', ({ message }) => {
+        console.log(message)
+      })
+
+      ffmpeg.on('progress', ({ progress }) => {
+        setProcessingProgress(Math.round(progress * 100))
+      })
+
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      })
+
+      ffmpegRef.current = ffmpeg
+      setFfmpegLoaded(true)
+    } catch (error) {
+      console.error('Failed to load FFmpeg:', error)
+      alert('Failed to load video processing library. Please refresh the page and try again.')
+    } finally {
+      setLoadingFFmpeg(false)
+    }
+  }
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
@@ -28,10 +75,50 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
     }
   }
 
-  const handleTrim = async () => {
-    if (!videoRef.current) return
+  const trimWithFFmpeg = async () => {
+    if (!ffmpegRef.current || !ffmpegLoaded) {
+      alert('FFmpeg is not loaded yet. Please wait and try again.')
+      return
+    }
 
-    setIsProcessing(true)
+    try {
+      const ffmpeg = ffmpegRef.current
+      setProcessingProgress(0)
+
+      // Fetch the video file
+      const videoData = await fetchFile(src)
+      await ffmpeg.writeFile('input.mp4', videoData)
+
+      // Calculate duration
+      const trimDuration = endTime - startTime
+
+      // Run FFmpeg trim command
+      await ffmpeg.exec([
+        '-i', 'input.mp4',
+        '-ss', startTime.toString(),
+        '-t', trimDuration.toString(),
+        '-c', 'copy',
+        'output.mp4'
+      ])
+
+      // Read the output file
+      const data = await ffmpeg.readFile('output.mp4')
+      const blob = new Blob([data], { type: 'video/mp4' })
+
+      setTrimmedVideoBlob(blob)
+      setShowInfoModal(true)
+
+      // Cleanup
+      await ffmpeg.deleteFile('input.mp4')
+      await ffmpeg.deleteFile('output.mp4')
+    } catch (error) {
+      console.error('FFmpeg trim error:', error)
+      alert('Failed to trim video with FFmpeg. Please try again.')
+    }
+  }
+
+  const trimWithMediaRecorder = async () => {
+    if (!videoRef.current) return
 
     try {
       const video = videoRef.current
@@ -63,12 +150,7 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `trimmed-${Date.now()}.webm`
-        a.click()
-        URL.revokeObjectURL(url)
+        setTrimmedVideoBlob(blob)
         setShowInfoModal(true)
       }
 
@@ -92,8 +174,63 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
 
       drawFrame()
     } catch (error) {
-      console.error('Trim error:', error)
+      console.error('MediaRecorder trim error:', error)
       alert('Failed to process video. Your browser may not support client-side video trimming.')
+    }
+  }
+
+  const handleTrim = async () => {
+    setIsProcessing(true)
+    try {
+      if (trimMethod === 'ffmpeg') {
+        await trimWithFFmpeg()
+      } else {
+        await trimWithMediaRecorder()
+      }
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  const handleDownloadTrimmed = () => {
+    if (!trimmedVideoBlob) return
+
+    const url = URL.createObjectURL(trimmedVideoBlob)
+    const a = document.createElement('a')
+    a.href = url
+    const extension = trimMethod === 'ffmpeg' ? 'mp4' : 'webm'
+    a.download = `trimmed-${Date.now()}.${extension}`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleSaveTrimmed = async () => {
+    if (!trimmedVideoBlob) return
+
+    try {
+      setIsProcessing(true)
+      const extension = trimMethod === 'ffmpeg' ? 'mp4' : 'webm'
+      const filename = `trimmed-${Date.now()}.${extension}`
+
+      const formData = new FormData()
+      formData.append('video', trimmedVideoBlob, filename)
+
+      const result = await uploadVideo(formData)
+
+      if (result.success) {
+        alert('Trimmed video saved successfully!')
+        setShowInfoModal(false)
+        setTrimmedVideoBlob(null)
+        onClose()
+        if (onSaveComplete) {
+          onSaveComplete()
+        }
+      } else {
+        alert('Failed to save trimmed video: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Save error:', error)
+      alert('Failed to save trimmed video')
     } finally {
       setIsProcessing(false)
     }
@@ -127,7 +264,45 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
           </div>
 
           <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h3 className="font-semibold text-lg">Trim Settings</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-lg">Trim Settings</h3>
+
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-600 dark:text-gray-400">Method:</label>
+                <select
+                  value={trimMethod}
+                  onChange={(e) => setTrimMethod(e.target.value as TrimMethod)}
+                  className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  disabled={isProcessing}
+                >
+                  <option value="ffmpeg">FFmpeg (Recommended)</option>
+                  <option value="mediarecorder">MediaRecorder</option>
+                </select>
+              </div>
+            </div>
+
+            {loadingFFmpeg && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  Loading FFmpeg... This may take a moment.
+                </p>
+              </div>
+            )}
+
+            {isProcessing && processingProgress > 0 && (
+              <div className="space-y-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${processingProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-center text-gray-600 dark:text-gray-400">
+                  Processing: {processingProgress}%
+                </p>
+              </div>
+            )}
 
             <div className="space-y-3">
               <div>
@@ -146,6 +321,7 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
                     if (videoRef.current) videoRef.current.currentTime = val
                   }}
                   className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                  disabled={isProcessing}
                 />
               </div>
 
@@ -161,6 +337,7 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
                   value={endTime}
                   onChange={(e) => setEndTime(parseFloat(e.target.value))}
                   className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                  disabled={isProcessing}
                 />
               </div>
 
@@ -172,11 +349,11 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
             <div className="flex gap-3">
               <button
                 onClick={handleTrim}
-                disabled={isProcessing || startTime >= endTime}
+                disabled={isProcessing || startTime >= endTime || (trimMethod === 'ffmpeg' && !ffmpegLoaded)}
                 className={cn(
                   'flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
                   'bg-blue-600 hover:bg-blue-700 text-white',
-                  (isProcessing || startTime >= endTime) && 'opacity-50 cursor-not-allowed'
+                  (isProcessing || startTime >= endTime || (trimMethod === 'ffmpeg' && !ffmpegLoaded)) && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 {isProcessing ? (
@@ -187,25 +364,27 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
                 ) : (
                   <>
                     <Scissors className="w-4 h-4" />
-                    <span>Trim & Export</span>
+                    <span>Trim Video</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={handleDownload}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                disabled={isProcessing}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
-                <span className="hidden sm:inline">Download Original</span>
+                <span className="hidden sm:inline">Original</span>
               </button>
             </div>
 
             <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
               <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-blue-800 dark:text-blue-200">
-                Client-side trimming uses the MediaRecorder API and exports as WebM format.
-                Audio quality is preserved at 2.5Mbps video bitrate. Works best in Chrome/Edge browsers.
+                {trimMethod === 'ffmpeg'
+                  ? 'FFmpeg provides accurate frame-perfect trimming and exports as MP4. Processing happens entirely in your browser.'
+                  : 'MediaRecorder re-encodes video and exports as WebM. May have audio sync issues for some videos.'}
               </p>
             </div>
           </div>
@@ -214,7 +393,10 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
 
       <Modal
         isOpen={showInfoModal}
-        onClose={() => setShowInfoModal(false)}
+        onClose={() => {
+          setShowInfoModal(false)
+          setTrimmedVideoBlob(null)
+        }}
         title="Video Trimmed Successfully"
       >
         <div className="space-y-4">
@@ -222,20 +404,49 @@ export function VideoEditor({ src, className, isOpen, onClose }: VideoEditorProp
             <AlertCircle className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
             <div className="space-y-2">
               <p className="text-sm font-medium text-green-900 dark:text-green-100">
-                Your trimmed video has been downloaded!
+                Your trimmed video is ready!
               </p>
               <p className="text-sm text-green-800 dark:text-green-200">
-                The video was processed entirely in your browser using client-side technology.
-                The exported file is in WebM format with VP9 codec.
+                The video was processed entirely in your browser using {trimMethod === 'ffmpeg' ? 'FFmpeg WebAssembly' : 'MediaRecorder API'}.
+                The exported file is in {trimMethod === 'ffmpeg' ? 'MP4' : 'WebM'} format.
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setShowInfoModal(false)}
-            className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Got it
-          </button>
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleDownloadTrimmed}
+              disabled={isProcessing}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors',
+                isProcessing && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              <Download className="w-4 h-4" />
+              Download
+            </button>
+
+            <button
+              onClick={handleSaveTrimmed}
+              disabled={isProcessing}
+              className={cn(
+                'flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors',
+                isProcessing && 'opacity-50 cursor-not-allowed'
+              )}
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Upload className="w-4 h-4" />
+                  Save to Gallery
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </Modal>
     </>

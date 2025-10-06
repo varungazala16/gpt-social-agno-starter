@@ -36,6 +36,10 @@ export default function Home() {
     setSelectedVideoForEdit(null)
   }
 
+  const handleSaveComplete = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
   const tabs = [
     { id: 'gallery' as Tab, label: 'Gallery', icon: Library },
     { id: 'upload' as Tab, label: 'Upload', icon: Upload },
@@ -131,6 +135,7 @@ export default function Home() {
           src={selectedVideoForEdit}
           isOpen={isEditorOpen}
           onClose={handleCloseEditor}
+          onSaveComplete={handleSaveComplete}
         />
       )}
 
