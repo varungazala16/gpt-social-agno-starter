@@ -103,7 +103,11 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
 
       // Read the output file
       const data = await ffmpeg.readFile('output.mp4')
-      const blob = new Blob([data], { type: 'video/mp4' })
+      // Convert to proper Uint8Array for Blob using slice to ensure proper ArrayBuffer
+      const uint8Data = typeof data === 'string' 
+        ? new TextEncoder().encode(data)
+        : new Uint8Array(data.slice())
+      const blob = new Blob([uint8Data], { type: 'video/mp4' })
 
       setTrimmedVideoBlob(blob)
       setShowInfoModal(true)
