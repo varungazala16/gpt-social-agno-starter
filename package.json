@@ -34,5 +34,8 @@
     "monorepo"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "supabase": "^2.48.3"
+  }
 }

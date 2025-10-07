@@ -7,6 +7,8 @@ Get up and running with GPT Social in 5 minutes using local Supabase!
 ✅ Node.js 18+  
 ✅ Docker Desktop (running)
 
+**Note:** The Supabase CLI is automatically installed as a dev dependency.
+
 ## 1️⃣ Install Dependencies
 
 ```bash

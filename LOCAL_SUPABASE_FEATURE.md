@@ -215,6 +215,8 @@ npm run supabase:sync:to-remote
 - npm
 - Docker Desktop (running)
 
+**Note:** The Supabase CLI is automatically installed as a dev dependency during `npm install`.
+
 ### Optional
 - Remote Supabase account (for syncing/production)
 

@@ -52,6 +52,8 @@ Backend API server (coming soon).
 - [mise](https://github.com/jdx/mise) (recommended for managing tool versions)
 - Docker Desktop (for local Supabase development - recommended)
 
+**Note:** The Supabase CLI is automatically installed as a dev dependency when you run `npm install`.
+
 ### Installation
 
 1. Clone the repository:

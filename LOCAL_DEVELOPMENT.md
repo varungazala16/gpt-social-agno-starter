@@ -8,6 +8,8 @@ This guide will help you set up and use Supabase locally for development, includ
 - npm or yarn
 - Docker Desktop (required for local Supabase)
 
+**Note:** The Supabase CLI is installed automatically as a dev dependency when you run `npm install`.
+
 ## Quick Start
 
 ### 1. Install Dependencies
