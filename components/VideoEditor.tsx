@@ -103,7 +103,11 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
 
       // Read the output file
       const data = await ffmpeg.readFile('output.mp4')
-      const blob = new Blob([data as BlobPart], { type: 'video/mp4' })
+      // Convert to proper Uint8Array for Blob using slice to ensure proper ArrayBuffer
+      const uint8Data = typeof data === 'string'
+        ? new TextEncoder().encode(data)
+        : new Uint8Array(data.slice())
+      const blob = new Blob([uint8Data], { type: 'video/mp4' })
 
       setTrimmedVideoBlob(blob)
       setShowInfoModal(true)
@@ -252,8 +256,8 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Edit Video">
-        <div className={cn('w-full space-y-4', className)}>
-          <div className="aspect-video bg-black rounded-lg overflow-hidden">
+        <div className={cn('w-full space-y-4 sm:space-y-6', className)}>
+          <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg">
             <video
               ref={videoRef}
               src={src}
@@ -263,16 +267,16 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
             />
           </div>
 
-          <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="space-y-4 p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg">Trim Settings</h3>
+              <h3 className="font-semibold text-base sm:text-lg">Trim Settings</h3>
 
               <div className="flex items-center gap-2">
-                <label className="text-sm text-gray-600 dark:text-gray-400">Method:</label>
+                <label className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Method:</label>
                 <select
                   value={trimMethod}
                   onChange={(e) => setTrimMethod(e.target.value as TrimMethod)}
-                  className="px-3 py-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
+                  className="px-2 sm:px-3 py-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-xs sm:text-sm"
                   disabled={isProcessing}
                 >
                   <option value="ffmpeg">FFmpeg (Recommended)</option>
@@ -346,25 +350,25 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               <button
                 onClick={handleTrim}
                 disabled={isProcessing || startTime >= endTime || (trimMethod === 'ffmpeg' && !ffmpegLoaded)}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors',
-                  'bg-blue-600 hover:bg-blue-700 text-white',
+                  'flex-1 flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+                  'bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base',
                   (isProcessing || startTime >= endTime || (trimMethod === 'ffmpeg' && !ffmpegLoaded)) && 'opacity-50 cursor-not-allowed'
                 )}
               >
                 {isProcessing ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Processing...</span>
+                    <span className="hidden sm:inline">Processing...</span>
                   </>
                 ) : (
                   <>
                     <Scissors className="w-4 h-4" />
-                    <span>Trim Video</span>
+                    <span>Trim</span>
                   </>
                 )}
               </button>
@@ -372,7 +376,7 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
               <button
                 onClick={handleDownload}
                 disabled={isProcessing}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md disabled:opacity-50 text-sm sm:text-base"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Original</span>

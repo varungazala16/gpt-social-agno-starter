@@ -26,6 +26,8 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 - **UI Framework**: Preline UI patterns
 - **Backend**: Supabase (Authentication & Storage)
 - **Database**: Supabase PostgreSQL
+- **Component Documentation**: Storybook 9.1.10
+- **Testing**: Vitest with React Testing Library
 
 ## Getting Started
 
@@ -56,6 +58,20 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 
 **Note**: You'll need to set up Supabase before the application will work. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions.
 
+### Running Storybook
+
+Storybook provides an isolated environment for developing and testing UI components.
+
+```bash
+# Run Storybook in development mode
+npm run storybook
+
+# Build Storybook for production
+npm run build-storybook
+```
+
+Open [http://localhost:6006](http://localhost:6006) to view Storybook.
+
 ### Building for Production
 
 ```bash
@@ -64,6 +80,54 @@ npm run build
 
 # Start the production server
 npm start
+```
+
+## Testing
+
+The project uses Vitest for unit and component testing with React Testing Library.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm test -- --run
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+
+Tests are located in the `__tests__` directory:
+
+```
+__tests__/
+├── actions/          # Server actions tests
+├── components/       # Component tests
+└── lib/              # Utility function tests
+```
+
+### Writing Tests
+
+Example component test:
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MyComponent } from '@/components/MyComponent'
+
+describe('MyComponent', () => {
+  it('should render correctly', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+  })
+})
 ```
 
 ## Features Overview
@@ -113,7 +177,12 @@ gpt.social/
 │   ├── VideoRecorder.tsx      # Video recording component
 │   ├── VideoEditor.tsx        # Video editing component
 │   ├── VideoGallery.tsx       # Video gallery grid
-│   └── UserProfile.tsx        # User profile and auth UI
+│   ├── UserProfile.tsx        # User profile and auth UI
+│   └── *.stories.tsx          # Storybook stories for components
+├── .storybook/
+│   ├── main.ts                # Storybook configuration
+│   └── preview.ts             # Global Storybook settings
+├── stories/                   # Example Storybook stories
 ├── actions/
 │   └── video.ts               # Server actions for video operations
 ├── lib/
@@ -122,9 +191,14 @@ gpt.social/
 │   │   ├── server.ts          # Supabase client for server
 │   │   └── middleware.ts      # Auth middleware utilities
 │   └── utils.ts               # Utility functions
+├── __tests__/                 # Test files
+│   ├── actions/               # Server actions tests
+│   ├── components/            # Component tests
+│   └── lib/                   # Utility tests
 ├── middleware.ts              # Next.js middleware for auth
 ├── .env.example               # Environment variables template
-├── SUPABASE_SETUP.md         # Detailed Supabase setup guide
+├── SUPABASE_SETUP.md          # Detailed Supabase setup guide
+├── vitest.config.ts           # Vitest configuration
 └── package.json
 ```
 
@@ -174,6 +248,26 @@ The application is built with a mobile-first approach:
 - Safari (latest)
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
+## Storybook
+
+This project includes Storybook for component development and documentation. All components have interactive stories that allow you to:
+
+- View components in isolation
+- Test different component states and props
+- Explore component documentation
+- Develop components without running the full application
+
+### Available Stories
+
+- **Modal** - Demonstrates modal dialogs with various configurations
+- **VideoPlayer** - Shows video player with different sizes and sources
+- **VideoUpload** - Upload interface with file handling
+- **VideoRecorder** - Video recording interface (requires camera permissions)
+- **VideoEditor** - Video editing modal with trim functionality
+- **VideoGallery** - Grid layout of uploaded videos
+
+Run `npm run storybook` to explore all component variations.
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -188,4 +282,5 @@ ISC
 - Styled with Tailwind CSS
 - UI patterns from Preline
 - Icons from Lucide React
+- Component documentation with Storybook 9
 
