@@ -36,6 +36,7 @@ class TokenResponse(BaseModel):
 class UserResponse(BaseModel):
     id: str
     email: str
+    user_metadata: dict = {}
 
 
 class SignupResponse(BaseModel):
