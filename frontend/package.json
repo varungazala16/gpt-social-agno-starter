@@ -12,7 +12,15 @@
     "build-storybook": "storybook build",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage"
+    "test:coverage": "vitest --coverage",
+    "supabase:start": "cd .. && npx supabase start",
+    "supabase:stop": "cd .. && npx supabase stop",
+    "supabase:status": "cd .. && npx supabase status",
+    "supabase:reset": "cd .. && npx supabase db reset",
+    "supabase:pull": "cd .. && npx supabase db pull",
+    "supabase:push": "cd .. && npx supabase db push",
+    "supabase:link": "cd .. && npx supabase link",
+    "supabase:migration:new": "cd .. && npx supabase migration new"
   },
   "keywords": [],
   "author": "",
