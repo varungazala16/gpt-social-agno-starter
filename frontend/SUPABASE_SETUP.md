@@ -2,8 +2,6 @@
 
 This guide will help you set up Supabase for the Video Studio application, including authentication, file storage, and admin access.
 
-> **💡 Prefer Local Development?** Check out [LOCAL_DEVELOPMENT.md](../LOCAL_DEVELOPMENT.md) for setting up Supabase locally using Docker. This is **recommended for development** as it's faster, free, and doesn't require a remote Supabase account.
-
 ## Prerequisites
 
 - A Supabase account (sign up at [https://supabase.com](https://supabase.com))
