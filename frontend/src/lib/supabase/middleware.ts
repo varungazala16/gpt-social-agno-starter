@@ -6,7 +6,7 @@ export async function updateSession(request: NextRequest) {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!url || !key) {
-    return NextResponse.next()
+    throw new Error('Supabase URL and Anon Key must be configured. Please see SUPABASE_SETUP.md')
   }
 
   let supabaseResponse = NextResponse.next({
