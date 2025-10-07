@@ -35,7 +35,6 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 
 - Node.js 18+ 
 - npm or yarn
-- Docker Desktop (for local Supabase - recommended)
 
 ### Installation
 
@@ -49,14 +48,7 @@ npm install
 
 # Set up environment variables
 cp .env.example .env.local
-
-# Option 1: Local Supabase (Recommended for Development)
-npm run supabase:start
-# The .env.local is already configured for local development
-
-# Option 2: Remote Supabase
-# Edit .env.local with your remote Supabase credentials
-# See SUPABASE_SETUP.md for instructions
+# Edit .env.local with your Supabase credentials
 
 # Run the development server
 npm run dev
@@ -64,16 +56,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-### Supabase Setup
-
-**Local Development (Recommended):**
-- Local Supabase runs in Docker and is faster/free
-- See [LOCAL_DEVELOPMENT.md](../LOCAL_DEVELOPMENT.md) for complete guide
-- Quick start: `npm run supabase:start`
-
-**Remote Supabase:**
-- For production or if Docker is not available
-- See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for setup instructions
+**Note**: You'll need to set up Supabase before the application will work. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions.
 
 ### Running Storybook
 
