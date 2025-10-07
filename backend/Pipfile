@@ -17,6 +17,9 @@ pydantic-settings = "*"
 [dev-packages]
 pytest = "*"
 pytest-asyncio = "*"
+ruff = "*"
+mypy = "*"
+pre-commit = "*"
 
 [requires]
-python_version = "3"
+python_version = "3.11"
