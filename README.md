@@ -50,20 +50,48 @@ cd gpt.social
 # Install mise (see https://mise.jdx.dev/getting-started.html)
 curl https://mise.run | sh
 
-# Activate mise
+# Activate mise and install Node.js
 mise install
 ```
 
-3. Set up the frontend:
+3. Install dependencies:
 ```bash
+# Install all workspace dependencies from the root
+npm install
+
+# Or install frontend dependencies individually
 cd frontend
 npm install
+```
+
+4. Set up the frontend:
+```bash
+cd frontend
 cp .env.example .env.local
 # Edit .env.local with your Supabase credentials
+```
+
+5. Run the development server:
+```bash
+# From the root directory
+npm run dev
+
+# Or from the frontend directory
+cd frontend
 npm run dev
 ```
 
-### Development
+## Development
+
+### Available Scripts
+
+From the root directory, you can run:
+
+- `npm run dev` - Start the frontend development server
+- `npm run build` - Build the frontend for production
+- `npm run lint` - Lint the frontend code
+- `npm test` - Run frontend tests
+- `npm run storybook` - Start Storybook for component development
 
 Each workspace has its own development setup. See the respective README files for details:
 
@@ -72,9 +100,13 @@ Each workspace has its own development setup. See the respective README files fo
 
 ## Testing
 
-Run tests from the frontend directory:
+Run tests from the root or frontend directory:
 
 ```bash
+# From root
+npm test
+
+# From frontend directory
 cd frontend
 npm test              # Run tests in watch mode
 npm test -- --run     # Run tests once
@@ -84,9 +116,13 @@ npm run test:coverage # Run tests with coverage
 
 ## Linting
 
-Run linting from the frontend directory:
+Run linting from the root or frontend directory:
 
 ```bash
+# From root
+npm run lint
+
+# From frontend directory
 cd frontend
 npm run lint
 ```

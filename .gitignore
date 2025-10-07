@@ -35,6 +35,10 @@ yarn-error.log*
 storybook-static
 *storybook.log
 
+# Uploads
+**/public/uploads/*
+!**/public/uploads/.gitkeep
+
 # IDE
 .vscode/
 .idea/

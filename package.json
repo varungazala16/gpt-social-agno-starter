@@ -1,0 +1,28 @@
+{
+  "name": "gpt-social-monorepo",
+  "version": "1.0.0",
+  "description": "GPT Social - Full Stack Video Studio Application",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "lint": "npm run lint --workspace=frontend",
+    "test": "npm run test --workspace=frontend",
+    "storybook": "npm run storybook --workspace=frontend",
+    "frontend:install": "npm install --workspace=frontend",
+    "backend:install": "echo 'Backend not yet implemented'"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "keywords": [
+    "video",
+    "studio",
+    "nextjs",
+    "supabase",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "ISC"
+}
