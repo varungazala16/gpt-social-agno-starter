@@ -163,39 +163,40 @@ describe('MyComponent', () => {
 
 ```
 gpt.social/
-├── app/
-│   ├── admin/                 # Admin dashboard (role-protected)
-│   ├── auth/                  # Auth callback handlers
-│   ├── login/                 # Login page
-│   ├── signup/                # Signup page
-│   ├── globals.css            # Global styles and Tailwind config
-│   ├── layout.tsx             # Root layout component
-│   └── page.tsx               # Main application page
-├── components/
-│   ├── VideoPlayer.tsx        # Custom video player with controls
-│   ├── VideoUpload.tsx        # File upload component
-│   ├── VideoRecorder.tsx      # Video recording component
-│   ├── VideoEditor.tsx        # Video editing component
-│   ├── VideoGallery.tsx       # Video gallery grid
-│   ├── UserProfile.tsx        # User profile and auth UI
-│   └── *.stories.tsx          # Storybook stories for components
+├── src/
+│   ├── app/
+│   │   ├── admin/             # Admin dashboard (role-protected)
+│   │   ├── auth/              # Auth callback handlers
+│   │   ├── login/             # Login page
+│   │   ├── signup/            # Signup page
+│   │   ├── globals.css        # Global styles and Tailwind config
+│   │   ├── layout.tsx         # Root layout component
+│   │   └── page.tsx           # Main application page
+│   ├── components/
+│   │   ├── VideoPlayer.tsx    # Custom video player with controls
+│   │   ├── VideoUpload.tsx    # File upload component
+│   │   ├── VideoRecorder.tsx  # Video recording component
+│   │   ├── VideoEditor.tsx    # Video editing component
+│   │   ├── VideoGallery.tsx   # Video gallery grid
+│   │   ├── UserProfile.tsx    # User profile and auth UI
+│   │   └── *.stories.tsx      # Storybook stories for components
+│   ├── actions/
+│   │   └── video.ts           # Server actions for video operations
+│   ├── lib/
+│   │   ├── supabase/
+│   │   │   ├── client.ts      # Supabase client for browser
+│   │   │   ├── server.ts      # Supabase client for server
+│   │   │   └── middleware.ts  # Auth middleware utilities
+│   │   └── utils.ts           # Utility functions
+│   └── middleware.ts          # Next.js middleware for auth
 ├── .storybook/
 │   ├── main.ts                # Storybook configuration
 │   └── preview.ts             # Global Storybook settings
 ├── stories/                   # Example Storybook stories
-├── actions/
-│   └── video.ts               # Server actions for video operations
-├── lib/
-│   ├── supabase/
-│   │   ├── client.ts          # Supabase client for browser
-│   │   ├── server.ts          # Supabase client for server
-│   │   └── middleware.ts      # Auth middleware utilities
-│   └── utils.ts               # Utility functions
 ├── __tests__/                 # Test files
 │   ├── actions/               # Server actions tests
 │   ├── components/            # Component tests
 │   └── lib/                   # Utility tests
-├── middleware.ts              # Next.js middleware for auth
 ├── .env.example               # Environment variables template
 ├── SUPABASE_SETUP.md          # Detailed Supabase setup guide
 ├── vitest.config.ts           # Vitest configuration
