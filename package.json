@@ -10,7 +10,17 @@
     "test": "npm run test --workspace=frontend",
     "storybook": "npm run storybook --workspace=frontend",
     "frontend:install": "npm install --workspace=frontend",
-    "backend:install": "echo 'Backend not yet implemented'"
+    "backend:install": "echo 'Backend not yet implemented'",
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:reset": "npx supabase db reset",
+    "supabase:pull": "npx supabase db pull",
+    "supabase:push": "npx supabase db push",
+    "supabase:link": "npx supabase link",
+    "supabase:migration:new": "npx supabase migration new",
+    "supabase:sync:from-remote": "./scripts/sync-from-remote.sh",
+    "supabase:sync:to-remote": "./scripts/sync-to-remote.sh"
   },
   "workspaces": [
     "frontend",
@@ -24,5 +34,8 @@
     "monorepo"
   ],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "supabase": "^2.48.3"
+  }
 }
