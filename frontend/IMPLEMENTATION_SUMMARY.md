@@ -221,6 +221,7 @@ To use this application, you need to:
 ### Dependencies Added
 - `@supabase/supabase-js` - Supabase JavaScript client
 - `@supabase/ssr` - Supabase Server-Side Rendering helpers
+- `supabase` (devDependency) - Supabase CLI for local development
 
 ### Files Modified
 - `src/app/page.tsx` - Added UserProfile component

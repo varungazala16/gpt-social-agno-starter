@@ -2,6 +2,20 @@
 
 A modern, full-stack video studio application for playing, uploading, recording, and editing videos.
 
+## 🚀 Quick Start
+
+**Want to start coding immediately?** See [QUICKSTART.md](./QUICKSTART.md) for a 5-minute setup guide using local Supabase!
+
+## 📖 Documentation
+
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes ⚡
+- **[LOCAL_SUPABASE_VISUAL_GUIDE.md](./LOCAL_SUPABASE_VISUAL_GUIDE.md)** - Visual guide & flowcharts 📊
+- **[LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md)** - Complete local Supabase guide 📚
+- **[LOCAL_VS_REMOTE.md](./LOCAL_VS_REMOTE.md)** - Choosing between local and remote 🤔
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions 🔧
+- **[frontend/SUPABASE_SETUP.md](./frontend/SUPABASE_SETUP.md)** - Remote Supabase setup ☁️
+- **[frontend/README.md](./frontend/README.md)** - Frontend documentation 💻
+
 ## Project Structure
 
 This is a monorepo containing:
@@ -36,6 +50,9 @@ Backend API server (coming soon).
 - Node.js 18+
 - npm or yarn
 - [mise](https://github.com/jdx/mise) (recommended for managing tool versions)
+- Docker Desktop (for local Supabase development - recommended)
+
+**Note:** The Supabase CLI is automatically installed as a dev dependency when you run `npm install`.
 
 ### Installation
 
@@ -71,6 +88,15 @@ cp .env.example .env.local
 # Edit .env.local with your Supabase credentials
 ```
 
+**For local development (recommended):**
+- Start local Supabase: `npm run supabase:start`
+- The `.env.example` is already configured for local development
+- See [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) for details
+
+**For remote Supabase:**
+- Follow the [Supabase Setup Guide](./frontend/SUPABASE_SETUP.md)
+- Update `.env.local` with your remote Supabase credentials
+
 5. Run the development server:
 ```bash
 # From the root directory
@@ -92,6 +118,16 @@ From the root directory, you can run:
 - `npm run lint` - Lint the frontend code
 - `npm test` - Run frontend tests
 - `npm run storybook` - Start Storybook for component development
+
+**Local Supabase Management:**
+- `npm run supabase:start` - Start local Supabase
+- `npm run supabase:stop` - Stop local Supabase
+- `npm run supabase:status` - Check Supabase status
+- `npm run supabase:reset` - Reset local database
+- `npm run supabase:pull` - Pull schema from remote Supabase
+- `npm run supabase:push` - Push migrations to remote Supabase
+
+See [LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md) for detailed Supabase local development guide.
 
 Each workspace has its own development setup. See the respective README files for details:
 
