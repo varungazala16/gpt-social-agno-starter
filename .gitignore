@@ -38,3 +38,7 @@ next-env.d.ts
 # uploads - ignore uploaded videos
 /public/uploads/*
 !/public/uploads/.gitkeep
+
+# storybook
+storybook-static
+*storybook.log
