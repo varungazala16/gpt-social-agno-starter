@@ -8,12 +8,13 @@ A modern, full-stack video studio application for playing, uploading, recording,
 
 ## 📖 Documentation
 
-- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
-- **[LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md)** - Complete local Supabase guide
-- **[LOCAL_VS_REMOTE.md](./LOCAL_VS_REMOTE.md)** - Choosing between local and remote
-- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions
-- **[frontend/SUPABASE_SETUP.md](./frontend/SUPABASE_SETUP.md)** - Remote Supabase setup
-- **[frontend/README.md](./frontend/README.md)** - Frontend documentation
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes ⚡
+- **[LOCAL_SUPABASE_VISUAL_GUIDE.md](./LOCAL_SUPABASE_VISUAL_GUIDE.md)** - Visual guide & flowcharts 📊
+- **[LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md)** - Complete local Supabase guide 📚
+- **[LOCAL_VS_REMOTE.md](./LOCAL_VS_REMOTE.md)** - Choosing between local and remote 🤔
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Common issues and solutions 🔧
+- **[frontend/SUPABASE_SETUP.md](./frontend/SUPABASE_SETUP.md)** - Remote Supabase setup ☁️
+- **[frontend/README.md](./frontend/README.md)** - Frontend documentation 💻
 
 ## Project Structure
 
