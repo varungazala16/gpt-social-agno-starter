@@ -279,6 +279,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 ## Troubleshooting
 
+Having issues? See [TROUBLESHOOTING.md](../TROUBLESHOOTING.md) for common problems and solutions.
+
 ### Docker Issues
 
 **Problem:** `Cannot connect to Docker daemon`

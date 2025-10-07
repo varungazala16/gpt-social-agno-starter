@@ -114,6 +114,8 @@ npx supabase db reset --force
 npm run supabase:start
 ```
 
+**📚 For more help, see [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)**
+
 ## 🚀 Production Setup
 
 For production, you'll want to:
