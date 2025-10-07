@@ -1,0 +1,14 @@
+{
+  "name": "gpt-social-backend",
+  "version": "1.0.0",
+  "description": "Backend API for GPT Social",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Backend not yet implemented'",
+    "build": "echo 'Backend not yet implemented'",
+    "start": "echo 'Backend not yet implemented'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

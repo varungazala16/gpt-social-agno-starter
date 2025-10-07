@@ -18,7 +18,7 @@ type Story = StoryObj<typeof VideoEditor>;
 const sampleVideoUrl = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
 
 // Wrapper component to manage state
-const VideoEditorWithState = (args: any) => {
+const VideoEditorWithState = (args: React.ComponentProps<typeof VideoEditor>) => {
   const [isOpen, setIsOpen] = useState(true);
   
   return (
