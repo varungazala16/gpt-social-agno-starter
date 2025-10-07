@@ -6,6 +6,7 @@ import { VideoUpload } from '@/components/VideoUpload'
 import { VideoRecorder } from '@/components/VideoRecorder'
 import { VideoGallery } from '@/components/VideoGallery'
 import { VideoEditor } from '@/components/VideoEditor'
+import { UserProfile } from '@/components/UserProfile'
 import { cn } from '@/lib/utils'
 
 type Tab = 'upload' | 'record' | 'gallery'
@@ -51,12 +52,17 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-            Video Studio
-          </h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Play, upload, record, and edit your videos
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                Video Studio
+              </h1>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Play, upload, record, and edit your videos
+              </p>
+            </div>
+            <UserProfile />
+          </div>
         </div>
       </header>
 

@@ -10,6 +10,10 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 - ✂️ **Edit Videos** - Basic video editing capabilities with trim preview
 - 📱 **Mobile-First Design** - Fully responsive, optimized for mobile devices
 - 🎨 **Modern UI** - Beautiful interface with Tailwind CSS
+- 🔐 **Authentication** - Secure user authentication with Supabase
+- 🗄️ **Cloud Storage** - Per-user video storage with Supabase Storage
+- 👤 **User Profiles** - Personal video libraries for each user
+- 🛡️ **Admin Dashboard** - Role-based access control for administrators
 
 ## Tech Stack
 
@@ -20,6 +24,8 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 - **Icons**: Lucide React
 - **Video Libraries**: Remotion Player & CLI
 - **UI Framework**: Preline UI patterns
+- **Backend**: Supabase (Authentication & Storage)
+- **Database**: Supabase PostgreSQL
 - **Component Documentation**: Storybook 9.1.10
 - **Testing**: Vitest with React Testing Library
 
@@ -40,11 +46,17 @@ cd gpt.social
 # Install dependencies
 npm install
 
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your Supabase credentials
+
 # Run the development server
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+**Note**: You'll need to set up Supabase before the application will work. See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed instructions.
 
 ### Running Storybook
 
@@ -152,31 +164,41 @@ describe('MyComponent', () => {
 ```
 gpt.social/
 ├── app/
-│   ├── globals.css          # Global styles and Tailwind config
-│   ├── layout.tsx            # Root layout component
-│   └── page.tsx              # Main application page
+│   ├── admin/                 # Admin dashboard (role-protected)
+│   ├── auth/                  # Auth callback handlers
+│   ├── login/                 # Login page
+│   ├── signup/                # Signup page
+│   ├── globals.css            # Global styles and Tailwind config
+│   ├── layout.tsx             # Root layout component
+│   └── page.tsx               # Main application page
 ├── components/
-│   ├── VideoPlayer.tsx       # Custom video player with controls
-│   ├── VideoUpload.tsx       # File upload component
-│   ├── VideoRecorder.tsx     # Video recording component
-│   ├── VideoEditor.tsx       # Video editing component
-│   ├── VideoGallery.tsx      # Video gallery grid
-│   └── *.stories.tsx         # Storybook stories for components
+│   ├── VideoPlayer.tsx        # Custom video player with controls
+│   ├── VideoUpload.tsx        # File upload component
+│   ├── VideoRecorder.tsx      # Video recording component
+│   ├── VideoEditor.tsx        # Video editing component
+│   ├── VideoGallery.tsx       # Video gallery grid
+│   ├── UserProfile.tsx        # User profile and auth UI
+│   └── *.stories.tsx          # Storybook stories for components
 ├── .storybook/
-│   ├── main.ts               # Storybook configuration
-│   └── preview.ts            # Global Storybook settings
-├── stories/                  # Example Storybook stories
+│   ├── main.ts                # Storybook configuration
+│   └── preview.ts             # Global Storybook settings
+├── stories/                   # Example Storybook stories
 ├── actions/
-│   └── video.ts              # Server actions for video operations
+│   └── video.ts               # Server actions for video operations
 ├── lib/
-│   └── utils.ts              # Utility functions
-├── __tests__/                # Test files
-│   ├── actions/              # Server actions tests
-│   ├── components/           # Component tests
-│   └── lib/                  # Utility tests
-├── public/
-│   └── uploads/              # Uploaded video storage
-├── vitest.config.ts          # Vitest configuration
+│   ├── supabase/
+│   │   ├── client.ts          # Supabase client for browser
+│   │   ├── server.ts          # Supabase client for server
+│   │   └── middleware.ts      # Auth middleware utilities
+│   └── utils.ts               # Utility functions
+├── __tests__/                 # Test files
+│   ├── actions/               # Server actions tests
+│   ├── components/            # Component tests
+│   └── lib/                   # Utility tests
+├── middleware.ts              # Next.js middleware for auth
+├── .env.example               # Environment variables template
+├── SUPABASE_SETUP.md          # Detailed Supabase setup guide
+├── vitest.config.ts           # Vitest configuration
 └── package.json
 ```
 
@@ -184,14 +206,31 @@ gpt.social/
 
 The application uses Next.js Server Actions for backend operations:
 
-- `uploadVideo` - Handle video file uploads
-- `saveRecording` - Save recorded videos from base64
-- `getVideos` - Retrieve all videos from storage
-- `deleteVideo` - Remove videos from storage
+- `uploadVideo` - Handle video file uploads to Supabase Storage (per user)
+- `saveRecording` - Save recorded videos to Supabase Storage (per user)
+- `getVideos` - Retrieve user's videos from Supabase Storage
+- `deleteVideo` - Remove videos from Supabase Storage (user's own files only)
+
+## Authentication
+
+The application uses Supabase Authentication with:
+
+- Email/password authentication
+- Protected routes (requires login)
+- Role-based access control for admin features
+- Automatic session management
 
 ## Environment Variables
 
-No environment variables are required for basic functionality. All videos are stored locally in `public/uploads/`.
+Required environment variables (see `.env.example`):
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+ADMIN_EMAIL=your-admin-email@example.com
+```
+
+See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for detailed setup instructions.
 
 ## Mobile Support
 
