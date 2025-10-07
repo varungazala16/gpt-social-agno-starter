@@ -21,6 +21,7 @@ A modern, mobile-first Next.js application for playing, uploading, recording, an
 - **Video Libraries**: Remotion Player & CLI
 - **UI Framework**: Preline UI patterns
 - **Component Documentation**: Storybook 9.1.10
+- **Testing**: Vitest with React Testing Library
 
 ## Getting Started
 
@@ -67,6 +68,54 @@ npm run build
 
 # Start the production server
 npm start
+```
+
+## Testing
+
+The project uses Vitest for unit and component testing with React Testing Library.
+
+### Running Tests
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Run tests once
+npm test -- --run
+
+# Run tests with UI
+npm run test:ui
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+
+Tests are located in the `__tests__` directory:
+
+```
+__tests__/
+├── actions/          # Server actions tests
+├── components/       # Component tests
+└── lib/              # Utility function tests
+```
+
+### Writing Tests
+
+Example component test:
+
+```typescript
+import { describe, it, expect } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MyComponent } from '@/components/MyComponent'
+
+describe('MyComponent', () => {
+  it('should render correctly', () => {
+    render(<MyComponent />)
+    expect(screen.getByText('Hello')).toBeInTheDocument()
+  })
+})
 ```
 
 ## Features Overview
@@ -121,8 +170,13 @@ gpt.social/
 │   └── video.ts              # Server actions for video operations
 ├── lib/
 │   └── utils.ts              # Utility functions
+├── __tests__/                # Test files
+│   ├── actions/              # Server actions tests
+│   ├── components/           # Component tests
+│   └── lib/                  # Utility tests
 ├── public/
 │   └── uploads/              # Uploaded video storage
+├── vitest.config.ts          # Vitest configuration
 └── package.json
 ```
 
