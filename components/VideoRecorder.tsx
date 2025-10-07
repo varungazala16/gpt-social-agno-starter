@@ -92,7 +92,7 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
 
   return (
     <div className={cn('w-full', className)}>
-      <div className="relative bg-black rounded-lg overflow-hidden aspect-video">
+      <div className="relative bg-black rounded-xl overflow-hidden aspect-video shadow-lg">
         <video
           ref={videoRef}
           className="w-full h-full object-cover"
@@ -103,27 +103,27 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
         {!stream && !isRecording && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
             <div className="text-center">
-              <Video className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-              <p className="text-gray-400">Camera preview will appear here</p>
+              <Video className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 text-gray-500" />
+              <p className="text-sm sm:text-base text-gray-400">Camera preview will appear here</p>
             </div>
           </div>
         )}
 
         {isRecording && (
-          <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full">
-            <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
-            <span className="text-sm font-medium">Recording</span>
+          <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex items-center gap-2 bg-red-600 text-white px-3 py-1.5 rounded-full shadow-lg">
+            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white rounded-full animate-pulse" />
+            <span className="text-xs sm:text-sm font-medium">Recording</span>
           </div>
         )}
       </div>
 
-      <div className="flex gap-4 mt-4">
+      <div className="flex gap-3 sm:gap-4 mt-4">
         {!isRecording ? (
           <button
             onClick={startRecording}
             disabled={isSaving}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors',
+              'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
               'bg-red-600 hover:bg-red-700 text-white',
               isSaving && 'opacity-50 cursor-not-allowed'
             )}
@@ -131,28 +131,30 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
             {isSaving ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                <span>Saving...</span>
+                <span className="text-sm sm:text-base">Saving...</span>
               </>
             ) : (
               <>
                 <Video className="w-5 h-5" />
-                <span>Start Recording</span>
+                <span className="text-sm sm:text-base">Start Recording</span>
               </>
             )}
           </button>
         ) : (
           <button
             onClick={stopRecording}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-all shadow-sm hover:shadow-md"
           >
             <Square className="w-5 h-5" />
-            <span>Stop Recording</span>
+            <span className="text-sm sm:text-base">Stop Recording</span>
           </button>
         )}
       </div>
 
       {error && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
       )}
     </div>
   )

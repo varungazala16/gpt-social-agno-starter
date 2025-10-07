@@ -62,21 +62,23 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
       <label
         htmlFor="video-upload"
         className={cn(
-          'flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors',
-          'hover:bg-gray-50 dark:hover:bg-gray-800',
-          isUploading ? 'opacity-50 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600'
+          'flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-xl cursor-pointer transition-all',
+          'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50',
+          isUploading 
+            ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-700' 
+            : 'border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600'
         )}
       >
-        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+        <div className="flex flex-col items-center justify-center p-6">
           {isUploading ? (
-            <Loader2 className="w-10 h-10 mb-3 text-gray-400 animate-spin" />
+            <Loader2 className="w-12 h-12 mb-4 text-blue-500 animate-spin" />
           ) : (
-            <Upload className="w-10 h-10 mb-3 text-gray-400" />
+            <Upload className="w-12 h-12 mb-4 text-gray-400" />
           )}
-          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mb-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
             <span className="font-semibold">Click to upload</span> or drag and drop
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
             MP4, WebM, or OGG (MAX. 100MB)
           </p>
         </div>
@@ -91,7 +93,9 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
         />
       </label>
       {error && (
-        <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        </div>
       )}
     </div>
   )
