@@ -2,6 +2,17 @@
 
 A modern, full-stack video studio application for playing, uploading, recording, and editing videos.
 
+## 🚀 Quick Start
+
+**Want to start coding immediately?** See [QUICKSTART.md](./QUICKSTART.md) for a 5-minute setup guide using local Supabase!
+
+## 📖 Documentation
+
+- **[QUICKSTART.md](./QUICKSTART.md)** - Get started in 5 minutes
+- **[LOCAL_DEVELOPMENT.md](./LOCAL_DEVELOPMENT.md)** - Complete local Supabase guide
+- **[frontend/SUPABASE_SETUP.md](./frontend/SUPABASE_SETUP.md)** - Remote Supabase setup
+- **[frontend/README.md](./frontend/README.md)** - Frontend documentation
+
 ## Project Structure
 
 This is a monorepo containing:
