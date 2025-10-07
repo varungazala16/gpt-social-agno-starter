@@ -11,7 +11,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
+  // Load all env vars in tests (not just VITE_ prefixed)
+  envPrefix: ['NEXT_PUBLIC_', 'VITE_'],
 })
