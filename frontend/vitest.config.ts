@@ -15,5 +15,5 @@ export default defineConfig({
     },
   },
   // Load all env vars in tests (not just VITE_ prefixed)
-  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
+  envPrefix: ['NEXT_PUBLIC_', 'VITE_'],
 })
