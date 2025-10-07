@@ -15,7 +15,7 @@ export default meta;
 type Story = StoryObj<typeof Modal>;
 
 // Wrapper component to manage state
-const ModalWithState = (args: any) => {
+const ModalWithState = (args: React.ComponentProps<typeof Modal>) => {
   const [isOpen, setIsOpen] = useState(true);
   
   return (
