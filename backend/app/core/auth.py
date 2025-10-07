@@ -19,6 +19,7 @@ async def get_supabase_client() -> AsyncClient:
         ),
     )
     if not supabase_client:
+        logging.error({"message": "Supabase client not initialized"})
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="Supabase client not initialized")
     return supabase_client
 
@@ -37,12 +38,16 @@ async def get_current_user(token: TokenDep, supabase_client: SupabaseClient):
     try:
         user_rsp = await supabase_client.auth.get_user(jwt=token)
         if not user_rsp or not user_rsp.user:
-            logging.error("User not found")
+            logging.error({"message": "User not found", "token_prefix": token[:10] if token else None})
             raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid authentication credentials")
+
+        logging.info({"message": "User authenticated successfully", "user_id": user_rsp.user.id, "email": user_rsp.user.email})
         return user_rsp.user
+    except HTTPException:
+        raise
     except Exception as e:
-        logging.error(f"Error validating user: {e}")
+        logging.error({"message": "Error validating user", "error": str(e), "error_type": type(e).__name__})
         raise HTTPException(status_code=HTTPStatus.UNAUTHORIZED, detail="Invalid authentication credentials")
 
 
-CurrentUser = Annotated[object, Depends(get_current_user)]
+User = Annotated[object, Depends(get_current_user)]

@@ -1,13 +1,12 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.core.auth import CurrentUser, SupabaseClient
+from app.core.auth import User, SupabaseClient
 from app.schemas.user import (
     UserCreate,
     UserLogin,
     SignupResponse,
     LoginResponse,
-    CurrentUserResponse,
-    UserResponse
+    UserResponse,
 )
 
 router = APIRouter()
@@ -83,10 +82,10 @@ async def login(credentials: UserLogin, supabase_client: SupabaseClient) -> Logi
         )
 
 
-@router.get("/me", response_model=CurrentUserResponse)
-async def get_current_user_info(current_user: CurrentUser) -> CurrentUserResponse:
+@router.get("/me", response_model=UserResponse)
+async def get_current_user_info(current_user: User) -> UserResponse:
     """Get current authenticated user information"""
-    return CurrentUserResponse(
+    return UserResponse(
         id=current_user.id,
         email=current_user.email,
         user_metadata=current_user.user_metadata or {}
