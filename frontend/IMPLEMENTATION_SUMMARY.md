@@ -14,7 +14,7 @@ This document summarizes the Supabase integration that has been added to the Vid
 ### 1. Authentication System
 
 #### Login & Signup Pages
-- **Location**: `/app/login/page.tsx` and `/app/signup/page.tsx`
+- **Location**: `/src/app/login/page.tsx` and `/src/app/signup/page.tsx`
 - **Features**:
   - Email and password authentication
   - Form validation (password length, matching passwords)
@@ -24,7 +24,7 @@ This document summarizes the Supabase integration that has been added to the Vid
   - Links to switch between login and signup
 
 #### User Profile Component
-- **Location**: `/components/UserProfile.tsx`
+- **Location**: `/src/components/UserProfile.tsx`
 - **Features**:
   - Displays current user's email
   - Sign out functionality
@@ -41,7 +41,7 @@ The video storage has been migrated from local filesystem to Supabase Storage:
 - No access control
 
 #### After (Supabase Storage)
-- **Location**: `/actions/video.ts` (completely rewritten)
+- **Location**: `/src/actions/video.ts` (completely rewritten)
 - Videos stored in Supabase Storage bucket named `videos`
 - Each user has their own folder: `videos/{user-id}/`
 - Access control via Row Level Security (RLS) policies
@@ -56,7 +56,7 @@ The video storage has been migrated from local filesystem to Supabase Storage:
 
 ### 3. Admin Dashboard
 
-- **Location**: `/app/admin/page.tsx`
+- **Location**: `/src/app/admin/page.tsx`
 - **Access Control**: Only accessible to users with admin role or specified admin email
 - **Features**:
   - Lists all registered users
@@ -74,7 +74,7 @@ The video storage has been migrated from local filesystem to Supabase Storage:
 
 ### 4. Middleware & Route Protection
 
-- **Location**: `/middleware.ts` and `/lib/supabase/middleware.ts`
+- **Location**: `/src/middleware.ts` and `/src/lib/supabase/middleware.ts`
 - **Functionality**:
   - Intercepts all requests (except static files)
   - Refreshes user session automatically
@@ -93,17 +93,17 @@ The video storage has been migrated from local filesystem to Supabase Storage:
 
 ### 5. Supabase Client Utilities
 
-#### Browser Client (`/lib/supabase/client.ts`)
+#### Browser Client (`/src/lib/supabase/client.ts`)
 - Used in client components
 - Handles browser-side authentication
 - Cookie-based session management
 
-#### Server Client (`/lib/supabase/server.ts`)
+#### Server Client (`/src/lib/supabase/server.ts`)
 - Used in server components and actions
 - Accesses cookies via Next.js cookies API
 - Handles server-side authentication
 
-#### Middleware Helper (`/lib/supabase/middleware.ts`)
+#### Middleware Helper (`/src/lib/supabase/middleware.ts`)
 - Session refresh logic
 - Route protection logic
 - Admin access verification
@@ -223,21 +223,21 @@ To use this application, you need to:
 - `@supabase/ssr` - Supabase Server-Side Rendering helpers
 
 ### Files Modified
-- `app/page.tsx` - Added UserProfile component
-- `actions/video.ts` - Complete rewrite for Supabase Storage
+- `src/app/page.tsx` - Added UserProfile component
+- `src/actions/video.ts` - Complete rewrite for Supabase Storage
 - `README.md` - Updated documentation
-- `components/VideoEditor.tsx` - Fixed TypeScript build error
+- `src/components/VideoEditor.tsx` - Fixed TypeScript build error
 
 ### Files Created
-- `middleware.ts` - Next.js middleware for auth
-- `lib/supabase/client.ts` - Browser Supabase client
-- `lib/supabase/server.ts` - Server Supabase client
-- `lib/supabase/middleware.ts` - Middleware helpers
-- `app/login/page.tsx` - Login page
-- `app/signup/page.tsx` - Signup page
-- `app/admin/page.tsx` - Admin dashboard
-- `app/auth/callback/route.ts` - Auth callback handler
-- `components/UserProfile.tsx` - User profile component
+- `src/middleware.ts` - Next.js middleware for auth
+- `src/lib/supabase/client.ts` - Browser Supabase client
+- `src/lib/supabase/server.ts` - Server Supabase client
+- `src/lib/supabase/middleware.ts` - Middleware helpers
+- `src/app/login/page.tsx` - Login page
+- `src/app/signup/page.tsx` - Signup page
+- `src/app/admin/page.tsx` - Admin dashboard
+- `src/app/auth/callback/route.ts` - Auth callback handler
+- `src/components/UserProfile.tsx` - User profile component
 - `.env.example` - Environment variables template
 - `SUPABASE_SETUP.md` - Setup instructions
 - `IMPLEMENTATION_SUMMARY.md` - This document

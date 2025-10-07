@@ -20,7 +20,7 @@ This directory contains the Storybook configuration for the Video Studio applica
 
 Stories are located in:
 - `../stories/**/*.stories.@(js|jsx|mjs|ts|tsx)` - Example stories
-- `../components/**/*.stories.@(js|jsx|mjs|ts|tsx)` - Component stories
+- `../src/components/**/*.stories.@(js|jsx|mjs|ts|tsx)` - Component stories
 
 ### Addons
 
