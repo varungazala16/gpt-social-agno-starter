@@ -13,6 +13,7 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage",
+    "supabase:login": "cd .. && npx supabase login",
     "supabase:start": "cd .. && npx supabase start",
     "supabase:stop": "cd .. && npx supabase stop",
     "supabase:status": "cd .. && npx supabase status",
