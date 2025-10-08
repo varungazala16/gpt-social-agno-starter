@@ -17,8 +17,7 @@ class YouTubeOAuth:
     TOKEN_URL = "https://oauth2.googleapis.com/token"
     REVOKE_URL = "https://oauth2.googleapis.com/revoke"
     SCOPES = [
-        "https://www.googleapis.com/auth/youtube.readonly",
-        "https://www.googleapis.com/auth/youtube.upload",
+        "https://www.googleapis.com/auth/youtube",
     ]
     STATE_LENGTH = 32
 
@@ -42,9 +41,9 @@ class YouTubeOAuth:
             "redirect_uri": self.redirect_uri,
             "response_type": "code",
             "scope": ",".join(self.SCOPES),
-            "access_type": "offline",  # Get refresh token
+            "access_type": "offline",
             "state": state,
-            "prompt": "consent",  # Force consent screen to get refresh token
+            "prompt": "consent",
         }
 
         authorization_url = f"{self.AUTHORIZATION_URL}?{urlencode(params)}"

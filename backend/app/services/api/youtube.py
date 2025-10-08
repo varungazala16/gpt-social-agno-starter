@@ -60,7 +60,7 @@ class YouTubeAPIClient:
             dict: Video list response
         """
         if part is None:
-            part = ["snippet", "contentDetails", "statistics"]
+            part = ["snippet", "contentDetails"]
 
         # First, get the uploads playlist ID
         channel_info = await self.get_channel_info(part=["contentDetails"])
@@ -100,6 +100,83 @@ class YouTubeAPIClient:
                 )
 
             return response.json()
+
+    async def get_shorts(
+        self,
+        max_results: int = 25,
+        page_token: str = None,
+    ) -> dict:
+        """
+        Get user's YouTube Shorts (videos with duration <= 60 seconds)
+
+        Args:
+            max_results: Maximum number of shorts to return (1-50)
+            page_token: Pagination token
+
+        Returns:
+            dict: Shorts list response
+        """
+        # Get all videos first
+        videos_response = await self.get_videos(
+            max_results=max_results,
+            page_token=page_token,
+            part=["snippet", "contentDetails"]
+        )
+
+        # Filter for shorts (duration <= 60 seconds)
+        shorts = []
+        for item in videos_response.get("items", []):
+            video_id = item.get("snippet", {}).get("resourceId", {}).get("videoId")
+
+            if video_id:
+                # Get video details to check duration
+                async with httpx.AsyncClient() as client:
+                    video_response = await client.get(
+                        f"{self.BASE_URL}/videos",
+                        headers=self.headers,
+                        params={
+                            "part": "contentDetails,snippet,statistics",
+                            "id": video_id,
+                        },
+                    )
+
+                    if video_response.status_code == 200:
+                        video_data = video_response.json()
+                        for video in video_data.get("items", []):
+                            duration = video.get("contentDetails", {}).get("duration", "")
+                            # Parse ISO 8601 duration (e.g., PT1M30S = 1 minute 30 seconds)
+                            # For simplicity, check if it's likely a short (no hours, <= 60 seconds)
+                            if "H" not in duration and self._is_short_duration(duration):
+                                shorts.append(video)
+
+        return {
+            "items": shorts,
+            "pageInfo": videos_response.get("pageInfo", {}),
+            "nextPageToken": videos_response.get("nextPageToken"),
+        }
+
+    def _is_short_duration(self, duration: str) -> bool:
+        """
+        Check if ISO 8601 duration represents a short video (<= 60 seconds)
+
+        Args:
+            duration: ISO 8601 duration string (e.g., PT1M30S, PT45S)
+
+        Returns:
+            bool: True if duration is <= 60 seconds
+        """
+        import re
+
+        # Parse ISO 8601 duration
+        match = re.match(r'PT(?:(\d+)M)?(?:(\d+)S)?', duration)
+        if not match:
+            return False
+
+        minutes = int(match.group(1) or 0)
+        seconds = int(match.group(2) or 0)
+        total_seconds = minutes * 60 + seconds
+
+        return total_seconds <= 60
 
     async def get_video_analytics(self, video_id: str, metrics: list[str] = None) -> dict:
         """

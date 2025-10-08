@@ -40,6 +40,10 @@ function setupEventListeners() {
     // TikTok account & videos
     document.getElementById('getTikTokAccountBtn').addEventListener('click', getTikTokAccount);
     document.getElementById('getTikTokVideosBtn').addEventListener('click', getTikTokVideos);
+
+    // YouTube account & videos
+    document.getElementById('getYouTubeAccountBtn').addEventListener('click', getYouTubeAccount);
+    document.getElementById('getYouTubeVideosBtn').addEventListener('click', getYouTubeVideos);
 }
 
 function updateAuthStatus() {
@@ -425,3 +429,70 @@ async function getTikTokVideos() {
         showResponse('tiktokResponse', { error: error.message }, true);
     }
 }
+
+async function getYouTubeAccount() {
+    if (!currentToken) {
+        showResponse('youtubeResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/youtube/account`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch YouTube account');
+        }
+
+        showResponse('youtubeResponse', {
+            message: '✅ YouTube Account Info',
+            account: {
+                platform: data.platform,
+                username: data.platform_username,
+                user_id: data.platform_user_id,
+                scopes: data.scopes,
+                connected_at: data.created_at,
+                metadata: data.platform_metadata
+            }
+        });
+
+    } catch (error) {
+        showResponse('youtubeResponse', { error: error.message }, true);
+    }
+}
+
+async function getYouTubeVideos() {
+    if (!currentToken) {
+        showResponse('youtubeResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/youtube/videos?max_results=10`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch YouTube videos');
+        }
+
+        showResponse('youtubeResponse', {
+            message: `✅ YouTube Videos (${data.items?.length || 0} shorts)`,
+            videos: data.items || [],
+            nextPageToken: data.nextPageToken
+        });
+
+    } catch (error) {
+        showResponse('youtubeResponse', { error: error.message }, true);
+    }
+}
+

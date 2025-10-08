@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, example, connections, tiktok, instagram, youtube
+from app.api.v1 import auth, connections, tiktok, instagram, youtube
 from app.core.config import settings
 
 app = FastAPI(
@@ -20,7 +20,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
-app.include_router(example.router, prefix=f"{settings.API_V1_STR}/example", tags=["example"])
 app.include_router(connections.router, prefix=f"{settings.API_V1_STR}/connections", tags=["connections"])
 app.include_router(tiktok.router, prefix=f"{settings.API_V1_STR}/tiktok", tags=["tiktok"])
 app.include_router(instagram.router, prefix=f"{settings.API_V1_STR}/instagram", tags=["instagram"])

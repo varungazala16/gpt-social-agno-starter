@@ -16,9 +16,12 @@ router = APIRouter()
 async def youtube_authorize(current_user: User):
     """Initiate YouTube OAuth flow"""
     oauth = YouTubeOAuth()
-    authorization_url, state = oauth.generate_authorization_url()
 
-    # TODO: Store state in Redis/session for CSRF protection
+    # Include user_id in state for callback
+    state_data = f"{current_user.id}"
+    authorization_url, state = oauth.generate_authorization_url(state=state_data)
+
+    # TODO: Store state in Redis for CSRF protection and to verify in callback
 
     return OAuthAuthorizeResponse(
         authorization_url=authorization_url,
@@ -28,14 +31,21 @@ async def youtube_authorize(current_user: User):
 
 @router.get("/oauth2/callback", response_model=OAuthCallbackResponse)
 async def youtube_callback(
-    current_user: User,
     db: Database,
     code: str = Query(..., description="Authorization code from YouTube"),
     state: str = Query(..., description="State parameter for CSRF protection"),
 ):
-    """Handle YouTube OAuth callback"""
+    """Handle YouTube OAuth callback (public endpoint)"""
 
-    # TODO: Verify state parameter against stored value
+    # Extract user_id from state
+    # TODO: Verify state parameter against stored value in Redis for CSRF protection
+    try:
+        user_id = UUID(state)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid state parameter"
+        )
 
     oauth = YouTubeOAuth()
 
@@ -53,7 +63,7 @@ async def youtube_callback(
         # Check if account already exists
         result = await db.execute(
             select(SocialAccount).where(
-                SocialAccount.user_id == UUID(current_user.id),
+                SocialAccount.user_id == user_id,
                 SocialAccount.platform == Platform.YOUTUBE
             )
         )
@@ -80,7 +90,7 @@ async def youtube_callback(
         else:
             # Create new account
             account = SocialAccount(
-                user_id=UUID(current_user.id),
+                user_id=user_id,
                 **social_account_data.model_dump()
             )
             db.add(account)
@@ -163,7 +173,7 @@ async def get_youtube_videos(
     max_results: int = Query(25, ge=1, le=50),
     page_token: str = Query(None, description="Pagination token"),
 ):
-    """Get user's YouTube videos"""
+    """Get user's YouTube Shorts (short-form videos only)"""
     result = await db.execute(
         select(SocialAccount).where(
             SocialAccount.user_id == UUID(current_user.id),
@@ -179,6 +189,7 @@ async def get_youtube_videos(
         )
 
     api_client = YouTubeAPIClient(account.access_token)
-    videos = await api_client.get_videos(max_results=max_results, page_token=page_token)
+    # Only return shorts (short-form content)
+    shorts = await api_client.get_shorts(max_results=max_results, page_token=page_token)
 
-    return videos
+    return shorts
