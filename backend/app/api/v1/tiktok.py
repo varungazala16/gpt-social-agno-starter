@@ -16,12 +16,12 @@ router = APIRouter()
 async def tiktok_authorize(current_user: User):
     """Initiate TikTok OAuth flow"""
     oauth = TikTokOAuth()
-    print(f"[DEBUG] TikTok redirect_uri: {oauth.redirect_uri}")
-    authorization_url, state = oauth.generate_authorization_url()
-    print(f"[DEBUG] Authorization URL: {authorization_url}")
 
-    # TODO: Store state in Redis/session for CSRF protection
-    # https://www.tiktok.com/v2/auth/authorize/?client_key=sbaw947o3ugmdjide4&redirect_uri=https%3A%2F%2Fapi.scrollmark-staging.com%2Fv1%2Ftiktok%2Fcreator%2Foauth2%2Fcallback%2F&scope=user.info.basic,user.info.stats,user.info.profile,video.list&state=940c6e3d8fd71a2bbe2c805fec38a2f39a8df2e15abd7e61400c9a025029106d&response_type=code
+    # Include user_id in state for callback
+    state_data = f"{current_user.id}"
+    authorization_url, state = oauth.generate_authorization_url(state=state_data)
+
+    # TODO: Store state in Redis for CSRF protection and to verify in callback
 
     return OAuthAuthorizeResponse(
         authorization_url=authorization_url,
@@ -31,14 +31,21 @@ async def tiktok_authorize(current_user: User):
 
 @router.get("/oauth2/callback", response_model=OAuthCallbackResponse)
 async def tiktok_callback(
-    current_user: User,
     db: Database,
     code: str = Query(..., description="Authorization code from TikTok"),
     state: str = Query(..., description="State parameter for CSRF protection"),
 ):
-    """Handle TikTok OAuth callback"""
+    """Handle TikTok OAuth callback (public endpoint)"""
 
-    # TODO: Verify state parameter against stored value
+    # Extract user_id from state
+    # TODO: Verify state parameter against stored value in Redis for CSRF protection
+    try:
+        user_id = UUID(state)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid state parameter"
+        )
 
     oauth = TikTokOAuth()
 
@@ -56,7 +63,7 @@ async def tiktok_callback(
         # Check if account already exists
         result = await db.execute(
             select(SocialAccount).where(
-                SocialAccount.user_id == UUID(current_user.id),
+                SocialAccount.user_id == user_id,
                 SocialAccount.platform == Platform.TIKTOK
             )
         )
@@ -83,7 +90,7 @@ async def tiktok_callback(
         else:
             # Create new account
             account = SocialAccount(
-                user_id=UUID(current_user.id),
+                user_id=user_id,
                 **social_account_data.model_dump()
             )
             db.add(account)

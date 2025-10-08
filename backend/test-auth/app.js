@@ -36,6 +36,10 @@ function setupEventListeners() {
     document.getElementById('connectInstagramBtn').addEventListener('click', () => connectSocialAccount('instagram'));
     document.getElementById('connectYouTubeBtn').addEventListener('click', () => connectSocialAccount('youtube'));
     document.getElementById('listConnectionsBtn').addEventListener('click', listConnections);
+
+    // TikTok account & videos
+    document.getElementById('getTikTokAccountBtn').addEventListener('click', getTikTokAccount);
+    document.getElementById('getTikTokVideosBtn').addEventListener('click', getTikTokVideos);
 }
 
 function updateAuthStatus() {
@@ -353,5 +357,71 @@ async function listConnections() {
 
     } catch (error) {
         showResponse('connectionsResponse', { error: error.message }, true);
+    }
+}
+
+async function getTikTokAccount() {
+    if (!currentToken) {
+        showResponse('tiktokResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tiktok/account`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch TikTok account');
+        }
+
+        showResponse('tiktokResponse', {
+            message: '✅ TikTok Account Info',
+            account: {
+                platform: data.platform,
+                username: data.platform_username,
+                user_id: data.platform_user_id,
+                scopes: data.scopes,
+                connected_at: data.created_at,
+                metadata: data.platform_metadata
+            }
+        });
+
+    } catch (error) {
+        showResponse('tiktokResponse', { error: error.message }, true);
+    }
+}
+
+async function getTikTokVideos() {
+    if (!currentToken) {
+        showResponse('tiktokResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/tiktok/videos?max_count=10`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch TikTok videos');
+        }
+
+        showResponse('tiktokResponse', {
+            message: `✅ TikTok Videos (${data.data?.videos?.length || 0} videos)`,
+            videos: data.data?.videos || [],
+            has_more: data.data?.has_more || false
+        });
+
+    } catch (error) {
+        showResponse('tiktokResponse', { error: error.message }, true);
     }
 }

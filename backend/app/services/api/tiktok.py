@@ -54,17 +54,37 @@ class TikTokAPIClient:
             dict: Video list response
         """
         if fields is None:
-            fields = ["id", "title", "video_description", "duration", "cover_image_url", "view_count"]
+            fields = [
+                "id",
+                "create_time",
+                "cover_image_url",
+                "share_url",
+                "video_description",
+                "duration",
+                "height",
+                "width",
+                "title",
+                "embed_html",
+                "embed_link",
+                "like_count",
+                "comment_count",
+                "share_count",
+                "view_count",
+            ]
+
+        # Build URL with fields in query string
+        url = f"{self.BASE_URL}/video/list/?fields={','.join(fields)}"
+
+        # Prepare form data payload
+        data = {}
+        if cursor:
+            data["cursor"] = cursor
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.BASE_URL}/video/list/",
+                url,
                 headers=self.headers,
-                json={
-                    "max_count": min(max_count, 20),
-                    "cursor": cursor,
-                    "fields": fields,
-                },
+                data=data,
             )
 
             if response.status_code != 200:
