@@ -11,6 +11,9 @@ sqlalchemy = "*"
 supabase = "*"
 psycopg2-binary = "*"
 psycopg = {extras = ["binary"], version = "*"}
+asyncpg = "*"
+greenlet = "*"
+httpx = "*"
 pydantic = "*"
 pydantic-settings = "*"
 
