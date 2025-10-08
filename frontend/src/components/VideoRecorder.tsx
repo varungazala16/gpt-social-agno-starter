@@ -2,8 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { Video, Square, Loader2 } from 'lucide-react'
-import { saveRecording } from '@/actions/video'
 import { cn } from '@/lib/utils'
+import { useSaveRecording } from '@/hooks/useSaveRecording'
 
 interface VideoRecorderProps {
   onRecordingComplete?: (url: string, filename: string) => void
@@ -12,10 +12,10 @@ interface VideoRecorderProps {
 
 export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderProps) {
   const [isRecording, setIsRecording] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
-  
+  const saveMutation = useSaveRecording()
+
   const videoRef = useRef<HTMLVideoElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -23,7 +23,7 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
   const startRecording = async () => {
     try {
       setError(null)
-      
+
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user' },
         audio: true
@@ -51,23 +51,28 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
 
       mediaRecorder.onstop = async () => {
         const blob = new Blob(chunksRef.current, { type: 'video/webm' })
-        
+
         // Convert blob to base64
         const reader = new FileReader()
         reader.readAsDataURL(blob)
         reader.onloadend = async () => {
           const base64data = reader.result as string
-          
-          setIsSaving(true)
-          const filename = `recording-${Date.now()}.webm`
-          const result = await saveRecording(base64data, filename)
-          setIsSaving(false)
 
-          if (result.success && result.url && result.filename) {
-            onRecordingComplete?.(result.url, result.filename)
-          } else {
-            setError(result.error || 'Failed to save recording')
-          }
+          const filename = `recording-${Date.now()}.webm`
+
+          saveMutation.mutate(
+            { blob: base64data, filename },
+            {
+              onSuccess: (result) => {
+                if (result.url && result.filename) {
+                  onRecordingComplete?.(result.url, result.filename)
+                }
+              },
+              onError: (error) => {
+                setError(error.message || 'Failed to save recording')
+              },
+            }
+          )
         }
 
         // Stop all tracks
@@ -121,14 +126,14 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
         {!isRecording ? (
           <button
             onClick={startRecording}
-            disabled={isSaving}
+            disabled={saveMutation.isPending}
             className={cn(
               'flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
               'bg-red-600 hover:bg-red-700 text-white',
-              isSaving && 'opacity-50 cursor-not-allowed'
+              saveMutation.isPending && 'opacity-50 cursor-not-allowed'
             )}
           >
-            {isSaving ? (
+            {saveMutation.isPending ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 <span className="text-sm sm:text-base">Saving...</span>
