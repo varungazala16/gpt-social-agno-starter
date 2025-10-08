@@ -65,10 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.refresh()
   }
 
+  // React 19: Render as provider directly
   return (
-    <AuthContext.Provider value={{ user, isLoading, isAdmin, signOut }}>
+    <AuthContext value={{ user, isLoading, isAdmin, signOut }}>
       {children}
-    </AuthContext.Provider>
+    </AuthContext>
   )
 }
 
