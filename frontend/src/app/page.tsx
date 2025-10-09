@@ -13,17 +13,14 @@ type Tab = 'upload' | 'record' | 'gallery'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('gallery')
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [selectedVideoForEdit, setSelectedVideoForEdit] = useState<string | null>(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
 
   const handleUploadSuccess = () => {
-    setRefreshTrigger(prev => prev + 1)
     setActiveTab('gallery')
   }
 
   const handleRecordingComplete = () => {
-    setRefreshTrigger(prev => prev + 1)
     setActiveTab('gallery')
   }
 
@@ -38,7 +35,7 @@ export default function Home() {
   }
 
   const handleSaveComplete = () => {
-    setRefreshTrigger(prev => prev + 1)
+    // React Query will auto-invalidate and refetch videos
   }
 
   const tabs = [
@@ -99,18 +96,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           {activeTab === 'gallery' && (
             <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  Video Gallery
-                </h2>
-                <button
-                  onClick={() => setRefreshTrigger(prev => prev + 1)}
-                  className="px-3 sm:px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md"
-                >
-                  Refresh
-                </button>
-              </div>
-              <VideoGallery refreshTrigger={refreshTrigger} onEditVideo={handleEditVideo} />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                Video Gallery
+              </h2>
+              <VideoGallery onEditVideo={handleEditVideo} />
             </div>
           )}
 

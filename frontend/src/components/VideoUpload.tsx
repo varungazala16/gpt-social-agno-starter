@@ -2,8 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { Upload, Loader2 } from 'lucide-react'
-import { uploadVideo } from '@/actions/video'
 import { cn } from '@/lib/utils'
+import { useUploadVideo } from '@/hooks/useUploadVideo'
 
 interface VideoUploadProps {
   onUploadSuccess?: (url: string, filename: string) => void
@@ -11,9 +11,9 @@ interface VideoUploadProps {
 }
 
 export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
-  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const uploadMutation = useUploadVideo()
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -31,30 +31,25 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
       return
     }
 
-    setIsUploading(true)
     setError(null)
 
-    try {
-      const formData = new FormData()
-      formData.append('video', file)
+    const formData = new FormData()
+    formData.append('video', file)
 
-      const result = await uploadVideo(formData)
-
-      if (result.success && result.url && result.filename) {
-        onUploadSuccess?.(result.url, result.filename)
+    uploadMutation.mutate(formData, {
+      onSuccess: (result) => {
+        if (result.url && result.filename) {
+          onUploadSuccess?.(result.url, result.filename)
+        }
         // Reset input
         if (fileInputRef.current) {
           fileInputRef.current.value = ''
         }
-      } else {
-        setError(result.error || 'Upload failed')
-      }
-    } catch (err) {
-      setError('Upload failed. Please try again.')
-      console.error('Upload error:', err)
-    } finally {
-      setIsUploading(false)
-    }
+      },
+      onError: (error) => {
+        setError(error.message || 'Upload failed. Please try again.')
+      },
+    })
   }
 
   return (
@@ -64,13 +59,13 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
         className={cn(
           'flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-xl cursor-pointer transition-all',
           'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-          isUploading 
-            ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-700' 
+          uploadMutation.isPending
+            ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-700'
             : 'border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600'
         )}
       >
         <div className="flex flex-col items-center justify-center p-6">
-          {isUploading ? (
+          {uploadMutation.isPending ? (
             <Loader2 className="w-12 h-12 mb-4 text-blue-500 animate-spin" />
           ) : (
             <Upload className="w-12 h-12 mb-4 text-gray-400" />
@@ -89,7 +84,7 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
           className="hidden"
           accept="video/*"
           onChange={handleFileChange}
-          disabled={isUploading}
+          disabled={uploadMutation.isPending}
         />
       </label>
       {error && (

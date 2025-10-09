@@ -113,14 +113,15 @@ export const Default: Story = {
   },
 }
 
-export const WithRefreshTrigger: Story = {
+export const WithEditCallback: Story = {
   args: {
-    refreshTrigger: 1,
+    onEditVideo: (url: string) => alert(`Editing video: ${url}`),
   },
+  render: (args) => <MockVideoGallery {...args} />,
   parameters: {
     docs: {
       description: {
-        story: 'The refreshTrigger prop can be incremented to force a reload of the video list. Useful after uploading new videos.',
+        story: 'Gallery with custom edit callback. Videos are automatically refreshed after mutations via React Query.',
       },
     },
   },
@@ -130,6 +131,7 @@ export const WithCustomClassName: Story = {
   args: {
     className: 'max-w-6xl mx-auto',
   },
+  render: (args) => <MockVideoGallery {...args} />,
   parameters: {
     docs: {
       description: {
@@ -143,6 +145,7 @@ export const Compact: Story = {
   args: {
     className: 'max-w-4xl',
   },
+  render: (args) => <MockVideoGallery {...args} />,
   parameters: {
     docs: {
       description: {
@@ -156,6 +159,7 @@ export const FullWidth: Story = {
   args: {
     className: 'w-full',
   },
+  render: (args) => <MockVideoGallery {...args} />,
   parameters: {
     docs: {
       description: {
@@ -166,6 +170,7 @@ export const FullWidth: Story = {
 }
 
 export const DarkMode: Story = {
+  render: (args) => <MockVideoGallery {...args} />,
   parameters: {
     backgrounds: {
       default: 'dark',
