@@ -8,6 +8,7 @@ import { AlertDialog } from './AlertDialog'
 import { FFmpeg } from '@ffmpeg/ffmpeg'
 import { fetchFile, toBlobURL } from '@ffmpeg/util'
 import { uploadVideo } from '@/actions/video'
+import { useQueryClient } from '@tanstack/react-query'
 
 type TrimMethod = 'ffmpeg' | 'mediarecorder'
 
@@ -20,6 +21,7 @@ interface VideoEditorProps {
 }
 
 export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }: VideoEditorProps) {
+  const queryClient = useQueryClient()
   const videoRef = useRef<HTMLVideoElement>(null)
   const ffmpegRef = useRef<FFmpeg | null>(null)
   const [startTime, setStartTime] = useState(0)
@@ -110,20 +112,31 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       const trimDuration = endTime - startTime
 
       // Run FFmpeg trim command
+      // For WebM inputs, we need to transcode to ensure MP4 compatibility
       await ffmpeg.exec([
         '-i', 'input.mp4',
         '-ss', startTime.toString(),
         '-t', trimDuration.toString(),
-        '-c', 'copy',
+        '-c:v', 'libx264',  // Video codec: H.264 for MP4 compatibility
+        '-c:a', 'aac',      // Audio codec: AAC for MP4 compatibility
+        '-preset', 'fast',   // Encoding speed/quality tradeoff
+        '-crf', '23',        // Quality setting (lower = better quality)
         'output.mp4'
       ])
 
       // Read the output file
       const data = await ffmpeg.readFile('output.mp4')
+      
       // Convert to proper Uint8Array for Blob using slice to ensure proper ArrayBuffer
       const uint8Data = typeof data === 'string'
         ? new TextEncoder().encode(data)
         : new Uint8Array(data.slice())
+      
+      // Check if the output file is valid (not empty)
+      if (uint8Data.length === 0) {
+        throw new Error('FFmpeg produced an empty output file. The video format may not be supported.')
+      }
+      
       const blob = new Blob([uint8Data], { type: 'video/mp4' })
 
       setTrimmedVideoBlob(blob)
@@ -249,6 +262,9 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
       const result = await uploadVideo(formData)
 
       if (result.success) {
+        // Invalidate videos query to refresh gallery immediately
+        queryClient.invalidateQueries({ queryKey: ['videos'] })
+        
         setAlertDialog({
           isOpen: true,
           title: 'Success',
@@ -429,7 +445,7 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
               <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
               <p className="text-xs text-blue-800 dark:text-blue-200">
                 {trimMethod === 'ffmpeg'
-                  ? 'FFmpeg provides accurate frame-perfect trimming and exports as MP4. Processing happens entirely in your browser.'
+                  ? 'FFmpeg provides accurate frame-perfect trimming and exports as MP4. WebM videos will be transcoded to H.264/AAC for compatibility. Processing happens entirely in your browser.'
                   : 'MediaRecorder re-encodes video and exports as WebM. May have audio sync issues for some videos.'}
               </p>
             </div>
@@ -454,7 +470,9 @@ export function VideoEditor({ src, className, isOpen, onClose, onSaveComplete }:
               </p>
               <p className="text-sm text-green-800 dark:text-green-200">
                 The video was processed entirely in your browser using {trimMethod === 'ffmpeg' ? 'FFmpeg WebAssembly' : 'MediaRecorder API'}.
-                The exported file is in {trimMethod === 'ffmpeg' ? 'MP4' : 'WebM'} format.
+                {trimMethod === 'ffmpeg' 
+                  ? 'The exported file has been transcoded to MP4 format with H.264/AAC codecs for maximum compatibility.'
+                  : 'The exported file is in WebM format.'}
               </p>
             </div>
           </div>
