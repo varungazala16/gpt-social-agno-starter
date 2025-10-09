@@ -13,13 +13,14 @@ from app.schemas.social_account import SocialAccountCreate
 class InstagramOAuth:
     """Instagram OAuth 2.0 service (via Facebook Graph API)"""
 
-    AUTHORIZATION_URL = "https://api.instagram.com/oauth/authorize"
+    AUTHORIZATION_URL = "https://www.instagram.com/oauth/authorize"
     TOKEN_URL = "https://api.instagram.com/oauth/access_token"
     LONG_LIVED_TOKEN_URL = "https://graph.instagram.com/access_token"
-    SCOPES = [ # TODO(ennsharma)
-        "user_profile",
-        "user_media",
+    SCOPES = [
         "instagram_business_basic",
+        "instagram_business_manage_messages",
+        "instagram_business_manage_comments",
+        "instagram_business_content_publish",
         "instagram_business_manage_insights",
     ]
     STATE_LENGTH = 32
@@ -40,6 +41,7 @@ class InstagramOAuth:
             state = secrets.token_urlsafe(self.STATE_LENGTH)
 
         params = {
+            "force_reauth": "false",
             "client_id": self.client_id,
             "redirect_uri": self.redirect_uri,
             "scope": ",".join(self.SCOPES),

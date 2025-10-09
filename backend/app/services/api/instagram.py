@@ -88,6 +88,45 @@ class InstagramAPIClient:
 
             return response.json()
 
+    async def get_videos(
+        self, limit: int = 25, after: str = None
+    ) -> dict:
+        """
+        Get user's Instagram videos (short-form content only, filtered to VIDEO type)
+
+        Args:
+            limit: Number of videos to return (max 25)
+            after: Pagination cursor
+
+        Returns:
+            dict: Video list response with only VIDEO media types
+        """
+        # First, get all media
+        media_response = await self.get_media(
+            limit=limit,
+            fields=[
+                "id",
+                "caption",
+                "media_type",
+                "media_url",
+                "thumbnail_url",
+                "permalink",
+                "timestamp",
+            ],
+            after=after
+        )
+
+        # Filter for VIDEO media type only
+        videos = [
+            item for item in media_response.get("data", [])
+            if item.get("media_type") == "VIDEO"
+        ]
+
+        return {
+            "data": videos,
+            "paging": media_response.get("paging", {}),
+        }
+
     async def get_media_insights(self, media_id: str, metrics: list[str] = None) -> dict:
         """
         Get insights for a specific media item

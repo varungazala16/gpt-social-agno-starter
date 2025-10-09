@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Response
 from sqlalchemy import select, update
 from uuid import UUID
 
 from app.core.auth import User
 from app.core.database import Database
+from app.core.config import settings
 from app.models.social_account import SocialAccount, Platform
 from app.schemas.social_account import OAuthAuthorizeResponse, OAuthCallbackResponse, SocialAccountResponse
 from app.services.oauth.instagram import InstagramOAuth
@@ -16,9 +17,12 @@ router = APIRouter()
 async def instagram_authorize(current_user: User):
     """Initiate Instagram OAuth flow"""
     oauth = InstagramOAuth()
-    authorization_url, state = oauth.generate_authorization_url()
 
-    # TODO: Store state in Redis/session for CSRF protection
+    # Include user_id in state for callback
+    state_data = f"{current_user.id}"
+    authorization_url, state = oauth.generate_authorization_url(state=state_data)
+
+    # TODO: Store state in Redis for CSRF protection and to verify in callback
 
     return OAuthAuthorizeResponse(
         authorization_url=authorization_url,
@@ -26,16 +30,23 @@ async def instagram_authorize(current_user: User):
     )
 
 
-@router.get("/oauth2/callback", response_model=OAuthCallbackResponse)
+@router.get("/oauth2/callback")
 async def instagram_callback(
-    current_user: User,
     db: Database,
     code: str = Query(..., description="Authorization code from Instagram"),
     state: str = Query(..., description="State parameter for CSRF protection"),
 ):
-    """Handle Instagram OAuth callback"""
+    """Handle Instagram OAuth callback (public endpoint)"""
 
-    # TODO: Verify state parameter against stored value
+    # Extract user_id from state
+    # TODO: Verify state parameter against stored value in Redis for CSRF protection
+    try:
+        user_id = UUID(state)
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid state parameter"
+        )
 
     oauth = InstagramOAuth()
 
@@ -60,7 +71,7 @@ async def instagram_callback(
         # Check if account already exists
         result = await db.execute(
             select(SocialAccount).where(
-                SocialAccount.user_id == UUID(current_user.id),
+                SocialAccount.user_id == user_id,
                 SocialAccount.platform == Platform.INSTAGRAM
             )
         )
@@ -87,7 +98,7 @@ async def instagram_callback(
         else:
             # Create new account
             account = SocialAccount(
-                user_id=UUID(current_user.id),
+                user_id=user_id,
                 **social_account_data.model_dump()
             )
             db.add(account)
@@ -156,14 +167,14 @@ async def disconnect_instagram(
     return {"success": True, "message": "Instagram account disconnected"}
 
 
-@router.get("/media")
-async def get_instagram_media(
+@router.get("/videos")
+async def get_instagram_videos(
     current_user: User,
     db: Database,
     limit: int = Query(25, ge=1, le=25),
     after: str = Query(None, description="Pagination cursor"),
 ):
-    """Get user's Instagram media"""
+    """Get user's Instagram videos (short-form content only, VIDEO media type)"""
     result = await db.execute(
         select(SocialAccount).where(
             SocialAccount.user_id == UUID(current_user.id),
@@ -179,6 +190,6 @@ async def get_instagram_media(
         )
 
     api_client = InstagramAPIClient(account.access_token)
-    media = await api_client.get_media(limit=limit, after=after)
+    videos = await api_client.get_videos(limit=limit, after=after)
 
-    return media
+    return videos

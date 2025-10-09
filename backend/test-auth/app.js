@@ -44,6 +44,10 @@ function setupEventListeners() {
     // YouTube account & videos
     document.getElementById('getYouTubeAccountBtn').addEventListener('click', getYouTubeAccount);
     document.getElementById('getYouTubeVideosBtn').addEventListener('click', getYouTubeVideos);
+
+    // Instagram account & videos
+    document.getElementById('getInstagramAccountBtn').addEventListener('click', getInstagramAccount);
+    document.getElementById('getInstagramVideosBtn').addEventListener('click', getInstagramVideos);
 }
 
 function updateAuthStatus() {
@@ -496,3 +500,68 @@ async function getYouTubeVideos() {
     }
 }
 
+async function getInstagramAccount() {
+    if (!currentToken) {
+        showResponse('instagramResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/instagram/account`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch Instagram account');
+        }
+
+        showResponse('instagramResponse', {
+            message: '✅ Instagram Account Info',
+            account: {
+                platform: data.platform,
+                username: data.platform_username,
+                user_id: data.platform_user_id,
+                scopes: data.scopes,
+                connected_at: data.created_at,
+                metadata: data.platform_metadata
+            }
+        });
+
+    } catch (error) {
+        showResponse('instagramResponse', { error: error.message }, true);
+    }
+}
+
+async function getInstagramVideos() {
+    if (!currentToken) {
+        showResponse('instagramResponse', { error: 'Please login first' }, true);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/instagram/videos?limit=10`, {
+            headers: {
+                'Authorization': `Bearer ${currentToken}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to fetch Instagram videos');
+        }
+
+        showResponse('instagramResponse', {
+            message: `✅ Instagram Videos (${data.data?.length || 0} videos)`,
+            videos: data.data || [],
+            paging: data.paging
+        });
+
+    } catch (error) {
+        showResponse('instagramResponse', { error: error.message }, true);
+    }
+}
