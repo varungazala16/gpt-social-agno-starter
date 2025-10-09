@@ -11,6 +11,7 @@ interface TrimControlsProps {
   onEndTimeChange: (time: number) => void
   onTrim: () => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
@@ -28,6 +29,7 @@ export function TrimControls({
   onEndTimeChange,
   onTrim,
   disabled = false,
+  queueMode = false,
   className
 }: TrimControlsProps) {
   const isValid = startTime < endTime
@@ -82,7 +84,7 @@ export function TrimControls({
         )}
       >
         <Scissors className="w-4 h-4" />
-        <span>Trim Video</span>
+        <span>{queueMode ? 'Add to Queue' : 'Trim Video'}</span>
       </button>
     </div>
   )

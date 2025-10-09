@@ -8,12 +8,14 @@ import { ASPECT_RATIO_PRESETS, type AspectRatio } from '@/lib/video-editor'
 interface CropControlsProps {
   onCrop: (aspectRatio: AspectRatio, mode: 'letterbox' | 'crop') => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
 export function CropControls({
   onCrop,
   disabled = false,
+  queueMode = false,
   className
 }: CropControlsProps) {
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(
@@ -111,7 +113,7 @@ export function CropControls({
         )}
       >
         <Crop className="w-4 h-4" />
-        <span>Apply Aspect Ratio</span>
+        <span>{queueMode ? 'Add to Queue' : 'Apply Aspect Ratio'}</span>
       </button>
     </div>
   )

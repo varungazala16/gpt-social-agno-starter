@@ -8,12 +8,14 @@ import type { FilterOptions } from '@/lib/video-editor'
 interface FiltersControlsProps {
   onApplyFilters: (filters: FilterOptions) => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
 export function FiltersControls({
   onApplyFilters,
   disabled = false,
+  queueMode = false,
   className
 }: FiltersControlsProps) {
   const [brightness, setBrightness] = useState(0)
@@ -143,7 +145,7 @@ export function FiltersControls({
           )}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Apply Filters</span>
+          <span>{queueMode ? 'Add to Queue' : 'Apply Filters'}</span>
         </button>
       </div>
 

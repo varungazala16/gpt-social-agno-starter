@@ -7,12 +7,14 @@ import { cn } from '@/lib/utils'
 interface SpeedControlsProps {
   onApplySpeed: (speed: number) => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
 export function SpeedControls({
   onApplySpeed,
   disabled = false,
+  queueMode = false,
   className
 }: SpeedControlsProps) {
   const [speed, setSpeed] = useState(1.0)
@@ -101,7 +103,7 @@ export function SpeedControls({
         )}
       >
         <Gauge className="w-4 h-4" />
-        <span>Apply Speed</span>
+        <span>{queueMode ? 'Add to Queue' : 'Apply Speed'}</span>
       </button>
     </div>
   )

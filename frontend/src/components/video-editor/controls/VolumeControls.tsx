@@ -7,12 +7,14 @@ import { cn } from '@/lib/utils'
 interface VolumeControlsProps {
   onApplyVolume: (volume: number) => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
 export function VolumeControls({
   onApplyVolume,
   disabled = false,
+  queueMode = false,
   className
 }: VolumeControlsProps) {
   const [volume, setVolume] = useState(1.0)
@@ -104,7 +106,7 @@ export function VolumeControls({
         ) : (
           <Volume2 className="w-4 h-4" />
         )}
-        <span>Apply Volume</span>
+        <span>{queueMode ? 'Add to Queue' : 'Apply Volume'}</span>
       </button>
     </div>
   )

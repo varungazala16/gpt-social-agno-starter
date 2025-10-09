@@ -9,6 +9,7 @@ interface RotateControlsProps {
   onRotate: (options: RotateOptions) => void
   onFlip: (options: FlipOptions) => void
   disabled?: boolean
+  queueMode?: boolean
   className?: string
 }
 
@@ -16,6 +17,7 @@ export function RotateControls({
   onRotate,
   onFlip,
   disabled = false,
+  queueMode = false,
   className
 }: RotateControlsProps) {
   const [selectedRotation, setSelectedRotation] = useState<0 | 90 | 180 | 270>(90)
@@ -99,7 +101,7 @@ export function RotateControls({
           )}
         >
           <RotateCw className="w-4 h-4" />
-          <span>Rotate {selectedRotation}°</span>
+          <span>{queueMode ? 'Add to Queue' : `Rotate ${selectedRotation}°`}</span>
         </button>
 
         {(flipH || flipV) && (
@@ -114,7 +116,7 @@ export function RotateControls({
           >
             {flipH && <FlipHorizontal className="w-4 h-4" />}
             {flipV && <FlipVertical className="w-4 h-4" />}
-            <span>Flip</span>
+            <span>{queueMode ? 'Add to Queue' : 'Flip'}</span>
           </button>
         )}
       </div>
