@@ -1,14 +1,13 @@
 'use client'
 
-import { X, GripVertical, Play, Trash2 } from 'lucide-react'
+import { X, Play } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QueuedOperation } from '@/lib/video-editor/core/queue-types'
 import { QueueManager } from '@/lib/video-editor/core/queue-manager'
 
 interface QueuePanelProps {
   operations: QueuedOperation[]
-  onRemove: (id: string) => void
-  onReorder?: (id: string, newIndex: number) => void
+  onRemove: (type: string) => void
   onClear: () => void
   onApplyAll: () => void
   isProcessing?: boolean
@@ -18,7 +17,6 @@ interface QueuePanelProps {
 export function QueuePanel({
   operations,
   onRemove,
-  onReorder,
   onClear,
   onApplyAll,
   isProcessing = false,
@@ -53,39 +51,29 @@ export function QueuePanel({
 
       {/* Operations List */}
       <div className="space-y-2 max-h-64 overflow-y-auto">
-        {operations.map((op, index) => (
+        {operations.map((op) => (
           <div
-            key={op.id}
-            className="flex items-center gap-2 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg group"
+            key={op.type}
+            className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
           >
-            {/* Drag Handle */}
-            {onReorder && (
-              <button
-                className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                disabled={isProcessing}
-              >
-                <GripVertical className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Order Number */}
-            <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-xs font-medium">
-              {index + 1}
+            {/* Operation Type Badge */}
+            <div className="flex-shrink-0 px-2 py-1 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium uppercase">
+              {op.type}
             </div>
 
             {/* Operation Label */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm truncate">
+              <p className="text-sm truncate font-medium">
                 {QueueManager.getOperationLabel(op)}
               </p>
             </div>
 
-            {/* Remove Button */}
+            {/* Clear Button */}
             <button
-              onClick={() => onRemove(op.id)}
+              onClick={() => onRemove(op.type)}
               disabled={isProcessing}
-              className="flex-shrink-0 p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
-              title="Remove operation"
+              className="flex-shrink-0 p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors disabled:opacity-50"
+              title="Clear this operation"
             >
               <X className="w-4 h-4" />
             </button>
@@ -109,7 +97,7 @@ export function QueuePanel({
 
       {/* Info */}
       <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-        Operations will be processed in order
+        Preview changes live • Click &ldquo;Apply All&rdquo; to render final video
       </p>
     </div>
   )

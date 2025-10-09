@@ -1,23 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
+import { Volume2, VolumeX, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VolumeControlsProps {
   onApplyVolume: (volume: number) => void
+  onRemove?: () => void
+  hasQueued?: boolean
   disabled?: boolean
-  queueMode?: boolean
   className?: string
 }
 
 export function VolumeControls({
   onApplyVolume,
+  onRemove,
+  hasQueued = false,
   disabled = false,
-  queueMode = false,
   className
 }: VolumeControlsProps) {
   const [volume, setVolume] = useState(1.0)
+
+  const handleVolumeChange = (newVolume: number) => {
+    setVolume(newVolume)
+    // Auto-add to queue when volume changes
+    if (newVolume !== 1.0) {
+      setTimeout(() => onApplyVolume(newVolume), 100) // Small delay to batch rapid changes
+    }
+  }
 
   const volumePresets = [
     { value: 0, label: 'Mute' },
@@ -50,7 +60,7 @@ export function VolumeControls({
             max="2"
             step="0.05"
             value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -69,7 +79,7 @@ export function VolumeControls({
             {volumePresets.map((preset) => (
               <button
                 key={preset.value}
-                onClick={() => setVolume(preset.value)}
+                onClick={() => handleVolumeChange(preset.value)}
                 disabled={disabled}
                 className={cn(
                   'px-3 py-2 text-sm rounded-lg border-2 transition-all',
@@ -92,22 +102,20 @@ export function VolumeControls({
         </div>
       </div>
 
-      <button
-        onClick={() => onApplyVolume(volume)}
-        disabled={disabled || volume === 1.0}
-        className={cn(
-          'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-          'bg-blue-600 hover:bg-blue-700 text-white',
-          (disabled || volume === 1.0) && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        {volume === 0 ? (
-          <VolumeX className="w-4 h-4" />
-        ) : (
-          <Volume2 className="w-4 h-4" />
-        )}
-        <span>{queueMode ? 'Add to Queue' : 'Apply Volume'}</span>
-      </button>
+      {hasQueued && onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={disabled}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+            'bg-red-600 hover:bg-red-700 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          <X className="w-4 h-4" />
+          <span>Remove from Queue</span>
+        </button>
+      )}
     </div>
   )
 }

@@ -1,23 +1,33 @@
 'use client'
 
 import { useState } from 'react'
-import { Gauge } from 'lucide-react'
+import { Gauge, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SpeedControlsProps {
   onApplySpeed: (speed: number) => void
+  onRemove?: () => void
+  hasQueued?: boolean
   disabled?: boolean
-  queueMode?: boolean
   className?: string
 }
 
 export function SpeedControls({
   onApplySpeed,
+  onRemove,
+  hasQueued = false,
   disabled = false,
-  queueMode = false,
   className
 }: SpeedControlsProps) {
   const [speed, setSpeed] = useState(1.0)
+
+  const handleSpeedChange = (newSpeed: number) => {
+    setSpeed(newSpeed)
+    // Auto-add to queue when speed changes
+    if (newSpeed !== 1.0) {
+      setTimeout(() => onApplySpeed(newSpeed), 100) // Small delay to batch rapid changes
+    }
+  }
 
   const speedPresets = [
     { value: 0.25, label: '0.25x' },
@@ -51,7 +61,7 @@ export function SpeedControls({
             max="4"
             step="0.05"
             value={speed}
-            onChange={(e) => setSpeed(parseFloat(e.target.value))}
+            onChange={(e) => handleSpeedChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -70,7 +80,7 @@ export function SpeedControls({
             {speedPresets.map((preset) => (
               <button
                 key={preset.value}
-                onClick={() => setSpeed(preset.value)}
+                onClick={() => handleSpeedChange(preset.value)}
                 disabled={disabled}
                 className={cn(
                   'px-3 py-2 text-sm rounded-lg border-2 transition-all',
@@ -93,18 +103,20 @@ export function SpeedControls({
         </div>
       </div>
 
-      <button
-        onClick={() => onApplySpeed(speed)}
-        disabled={disabled || speed === 1.0}
-        className={cn(
-          'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-          'bg-blue-600 hover:bg-blue-700 text-white',
-          (disabled || speed === 1.0) && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        <Gauge className="w-4 h-4" />
-        <span>{queueMode ? 'Add to Queue' : 'Apply Speed'}</span>
-      </button>
+      {hasQueued && onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={disabled}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+            'bg-red-600 hover:bg-red-700 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          <X className="w-4 h-4" />
+          <span>Remove from Queue</span>
+        </button>
+      )}
     </div>
   )
 }

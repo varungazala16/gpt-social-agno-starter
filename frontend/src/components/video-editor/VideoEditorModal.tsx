@@ -5,25 +5,25 @@ import {
   Scissors,
   Crop,
   RotateCw,
+  FlipHorizontal,
   Gauge,
   Volume2,
   Sparkles,
   Download,
   Upload,
   Loader2,
-  AlertCircle,
-  Layers
+  AlertCircle
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Modal } from '../Modal'
 import { AlertDialog } from '../AlertDialog'
-import { VideoPlayer } from './VideoPlayer'
 import { VideoPreview } from './VideoPreview'
 import { QueuePanel } from './QueuePanel'
 import {
   TrimControls,
   CropControls,
   RotateControls,
+  FlipControls,
   SpeedControls,
   VolumeControls,
   FiltersControls
@@ -44,12 +44,13 @@ interface VideoEditorModalProps {
   className?: string
 }
 
-type Tab = 'trim' | 'crop' | 'rotate' | 'speed' | 'volume' | 'filters'
+type Tab = 'trim' | 'crop' | 'rotate' | 'flip' | 'speed' | 'volume' | 'filters'
 
 const tabs: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
   { id: 'trim', label: 'Trim', icon: Scissors },
   { id: 'crop', label: 'Crop', icon: Crop },
   { id: 'rotate', label: 'Rotate', icon: RotateCw },
+  { id: 'flip', label: 'Flip', icon: FlipHorizontal },
   { id: 'speed', label: 'Speed', icon: Gauge },
   { id: 'volume', label: 'Volume', icon: Volume2 },
   { id: 'filters', label: 'Filters', icon: Sparkles },
@@ -82,19 +83,37 @@ export function VideoEditorModal({
   const [startTime, setStartTime] = useState(0)
   const [endTime, setEndTime] = useState(0)
 
-  // Queue mode state
-  const [queueMode, setQueueMode] = useState(false)
+  // Batch processing state
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; operation: string } | null>(null)
+  const [batchResult, setBatchResult] = useState<{ blob: Blob; format: 'mp4' | 'webm' } | null>(null)
 
   // Initialize queue mode hook
   const {
     operations,
     addOperation,
+    getOperation,
     removeOperation,
     clearQueue,
     previewState,
     previewEnabled
   } = useQueueMode()
+
+  // Helper to check if an operation type is queued
+  const hasQueued = (type: string) => !!getOperation(type)
+
+  // Helper to create remove handlers
+  const createRemoveHandler = (type: string) => () => {
+    removeOperation(type)
+    // Reset local state based on type
+    switch (type) {
+      case 'trim':
+        setStartTime(0)
+        setEndTime(metadata.duration || 0)
+        break
+      // Note: Other operation types (crop, rotate, flip, speed, volume, filters)
+      // maintain their own state within their respective control components
+    }
+  }
 
   const {
     videoRef,
@@ -105,14 +124,7 @@ export function VideoEditorModal({
     ffmpegProgress,
     isProcessing,
     processingOperation,
-    result,
-    trim,
-    crop,
-    rotate,
-    flip,
-    speed,
-    volume,
-    filters
+    result
   } = useVideoEditor({
     videoSrc: src,
     autoLoadFFmpeg: isOpen,
@@ -147,83 +159,53 @@ export function VideoEditorModal({
 
   // Handle operations
   const handleTrim = async () => {
-    if (queueMode) {
-      // Add to queue instead of processing
-      const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60)
-        const seconds = Math.floor(time % 60)
-        return `${minutes}:${seconds.toString().padStart(2, '0')}`
-      }
-      const label = `Trim: ${formatTime(startTime)} → ${formatTime(endTime)}`
-      addOperation('trim', label, { startTime, endTime })
-    } else {
-      // Immediate processing (existing behavior)
-      await trim({ startTime, endTime })
+    const formatTime = (time: number) => {
+      const minutes = Math.floor(time / 60)
+      const seconds = Math.floor(time % 60)
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
     }
+    const label = `Trim: ${formatTime(startTime)} → ${formatTime(endTime)}`
+    addOperation('trim', label, { startTime, endTime })
   }
 
   const handleCrop = async (aspectRatio: AspectRatio, mode: 'letterbox' | 'crop') => {
-    if (queueMode) {
-      const label = `Crop: ${aspectRatio.label} (${mode})`
-      addOperation('crop', label, {
-        width: aspectRatio.width,
-        height: aspectRatio.height,
-        label: aspectRatio.label,
-        mode
-      } as unknown as import('@/lib/video-editor').CropOptions)
-    } else {
-      await crop(aspectRatio, mode)
-    }
+    const label = `Crop: ${aspectRatio.label} (${mode})`
+    addOperation('crop', label, {
+      width: aspectRatio.width,
+      height: aspectRatio.height,
+      label: aspectRatio.label,
+      mode
+    } as unknown as import('@/lib/video-editor').CropOptions)
   }
 
   const handleRotate = async (degrees: 0 | 90 | 180 | 270) => {
-    if (queueMode) {
-      const label = `Rotate: ${degrees}°`
-      addOperation('rotate', label, { degrees })
-    } else {
-      await rotate({ degrees })
-    }
+    const label = `Rotate: ${degrees}°`
+    addOperation('rotate', label, { degrees })
   }
 
   const handleFlip = async (horizontal: boolean, vertical: boolean) => {
-    if (queueMode) {
-      const label = `Flip: ${horizontal ? 'Horizontal' : ''}${horizontal && vertical ? ' + ' : ''}${vertical ? 'Vertical' : ''}`
-      addOperation('flip', label, { horizontal, vertical })
-    } else {
-      await flip({ horizontal, vertical })
-    }
+    const label = `Flip: ${horizontal ? 'Horizontal' : ''}${horizontal && vertical ? ' + ' : ''}${vertical ? 'Vertical' : ''}`
+    addOperation('flip', label, { horizontal, vertical })
   }
 
   const handleSpeed = async (speedValue: number) => {
-    if (queueMode) {
-      const label = `Speed: ${speedValue}x`
-      addOperation('speed', label, { speed: speedValue })
-    } else {
-      await speed({ speed: speedValue })
-    }
+    const label = `Speed: ${speedValue}x`
+    addOperation('speed', label, { speed: speedValue })
   }
 
   const handleVolume = async (volumeValue: number) => {
-    if (queueMode) {
-      const label = `Volume: ${Math.round(volumeValue * 100)}%`
-      addOperation('volume', label, { volume: volumeValue })
-    } else {
-      await volume({ volume: volumeValue })
-    }
+    const label = `Volume: ${Math.round(volumeValue * 100)}%`
+    addOperation('volume', label, { volume: volumeValue })
   }
 
   const handleFilters = async (filterOptions: import('@/lib/video-editor').FilterOptions) => {
-    if (queueMode) {
-      const parts: string[] = []
-      if (filterOptions.brightness) parts.push(`Brightness ${filterOptions.brightness > 0 ? '+' : ''}${Math.round(filterOptions.brightness * 100)}%`)
-      if (filterOptions.contrast) parts.push(`Contrast ${filterOptions.contrast > 0 ? '+' : ''}${Math.round(filterOptions.contrast * 100)}%`)
-      if (filterOptions.saturation !== undefined && filterOptions.saturation !== 1) parts.push(`Saturation ${Math.round(filterOptions.saturation * 100)}%`)
-      if (filterOptions.blur) parts.push(`Blur ${filterOptions.blur}px`)
-      const label = `Filters: ${parts.join(', ')}`
-      addOperation('filters', label, filterOptions)
-    } else {
-      await filters(filterOptions)
-    }
+    const parts: string[] = []
+    if (filterOptions.brightness) parts.push(`Brightness ${filterOptions.brightness > 0 ? '+' : ''}${Math.round(filterOptions.brightness * 100)}%`)
+    if (filterOptions.contrast) parts.push(`Contrast ${filterOptions.contrast > 0 ? '+' : ''}${Math.round(filterOptions.contrast * 100)}%`)
+    if (filterOptions.saturation !== undefined && filterOptions.saturation !== 1) parts.push(`Saturation ${Math.round(filterOptions.saturation * 100)}%`)
+    if (filterOptions.blur) parts.push(`Blur ${filterOptions.blur}px`)
+    const label = `Filters: ${parts.join(', ')}`
+    addOperation('filters', label, filterOptions)
   }
 
   // Batch processing handler
@@ -236,7 +218,7 @@ export function VideoEditorModal({
       const ffmpegManager = FFmpegManager.getInstance()
       const ffmpegInstance = ffmpegManager.getFFmpeg()
 
-      await processBatch(
+      const result = await processBatch(
         ffmpegInstance,
         src,
         operations,
@@ -245,6 +227,9 @@ export function VideoEditorModal({
           setBatchProgress({ current, total, operation })
         }
       )
+
+      // Save batch result for Download/Save buttons
+      setBatchResult(result)
 
       // Show result
       setShowResultModal(true)
@@ -264,26 +249,28 @@ export function VideoEditorModal({
 
   // Download result
   const handleDownload = () => {
-    if (!result) return
+    const videoResult = batchResult || result
+    if (!videoResult) return
 
-    const url = URL.createObjectURL(result.blob)
+    const url = URL.createObjectURL(videoResult.blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `edited-${Date.now()}.${result.format}`
+    a.download = `edited-${Date.now()}.${videoResult.format}`
     a.click()
     URL.revokeObjectURL(url)
   }
 
   // Save to gallery
   const handleSave = async () => {
-    if (!result) return
+    const videoResult = batchResult || result
+    if (!videoResult) return
 
     try {
       setIsSaving(true)
-      const filename = `edited-${Date.now()}.${result.format}`
+      const filename = `edited-${Date.now()}.${videoResult.format}`
 
       const formData = new FormData()
-      formData.append('video', result.blob, filename)
+      formData.append('video', videoResult.blob, filename)
 
       const uploadResult = await uploadVideo(formData)
 
@@ -330,21 +317,13 @@ export function VideoEditorModal({
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Edit Video">
         <div className={cn('w-full space-y-4 sm:space-y-6', className)}>
-          {/* Video Player - with preview support */}
-          {queueMode ? (
-            <VideoPreview
-              ref={videoRef}
-              src={src}
-              previewState={previewEnabled ? previewState : undefined}
-              onLoadedMetadata={handleMetadataLoad}
-            />
-          ) : (
-            <VideoPlayer
-              ref={videoRef}
-              src={src}
-              onLoadedMetadata={handleMetadataLoad}
-            />
-          )}
+          {/* Video Preview */}
+          <VideoPreview
+            ref={videoRef}
+            src={src}
+            previewState={previewEnabled ? previewState : undefined}
+            onLoadedMetadata={handleMetadataLoad}
+          />
 
           {/* FFmpeg Loading Indicator */}
           {ffmpegLoading && (
@@ -355,34 +334,6 @@ export function VideoEditorModal({
               </p>
             </div>
           )}
-
-          {/* Queue Mode Toggle */}
-          <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              <span className="text-sm font-medium">Queue Mode</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                (Stack operations before processing)
-              </span>
-            </div>
-
-            <button
-              onClick={() => setQueueMode(!queueMode)}
-              disabled={isProcessing}
-              className={cn(
-                'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                queueMode ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700',
-                isProcessing && 'opacity-50 cursor-not-allowed'
-              )}
-            >
-              <span
-                className={cn(
-                  'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
-                  queueMode ? 'translate-x-6' : 'translate-x-1'
-                )}
-              />
-            </button>
-          </div>
 
           {/* Processing Progress */}
           {(isProcessing || batchProgress) && (
@@ -442,63 +393,75 @@ export function VideoEditorModal({
                 onStartTimeChange={handleStartTimeChange}
                 onEndTimeChange={setEndTime}
                 onTrim={handleTrim}
+                onRemove={createRemoveHandler('trim')}
+                hasQueued={hasQueued('trim')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
               />
             )}
 
             {activeTab === 'crop' && (
               <CropControls
                 onCrop={handleCrop}
+                onRemove={createRemoveHandler('crop')}
+                hasQueued={hasQueued('crop')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
               />
             )}
 
             {activeTab === 'rotate' && (
               <RotateControls
                 onRotate={(options) => handleRotate(options.degrees)}
-                onFlip={(options) => handleFlip(options.horizontal, options.vertical)}
+                onRemove={createRemoveHandler('rotate')}
+                hasQueued={hasQueued('rotate')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
+              />
+            )}
+
+            {activeTab === 'flip' && (
+              <FlipControls
+                onFlip={(options) => handleFlip(options.horizontal, options.vertical)}
+                onRemove={createRemoveHandler('flip')}
+                hasQueued={hasQueued('flip')}
+                disabled={isProcessing || !ffmpegLoaded}
               />
             )}
 
             {activeTab === 'speed' && (
               <SpeedControls
                 onApplySpeed={handleSpeed}
+                onRemove={createRemoveHandler('speed')}
+                hasQueued={hasQueued('speed')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
               />
             )}
 
             {activeTab === 'volume' && (
               <VolumeControls
                 onApplyVolume={handleVolume}
+                onRemove={createRemoveHandler('volume')}
+                hasQueued={hasQueued('volume')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
               />
             )}
 
             {activeTab === 'filters' && (
               <FiltersControls
                 onApplyFilters={handleFilters}
+                onRemove={createRemoveHandler('filters')}
+                hasQueued={hasQueued('filters')}
                 disabled={isProcessing || !ffmpegLoaded}
-                queueMode={queueMode}
               />
             )}
           </div>
 
-          {/* Queue Panel - shows only in queue mode */}
-          {queueMode && (
-            <QueuePanel
-              operations={operations}
-              onRemove={removeOperation}
-              onClear={clearQueue}
-              onApplyAll={handleApplyAll}
-              isProcessing={isProcessing || batchProgress !== null}
-            />
-          )}
+          {/* Queue Panel */}
+          <QueuePanel
+            operations={operations}
+            onRemove={removeOperation}
+            onClear={clearQueue}
+            onApplyAll={handleApplyAll}
+            isProcessing={isProcessing || batchProgress !== null}
+          />
 
           {/* Info Message */}
           <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -526,7 +489,7 @@ export function VideoEditorModal({
               </p>
               <p className="text-sm text-green-800 dark:text-green-200">
                 The video was processed entirely in your browser using FFmpeg WebAssembly.
-                The exported file is in {result?.format.toUpperCase()} format.
+                The exported file is in {(batchResult || result)?.format.toUpperCase()} format.
               </p>
             </div>
           </div>

@@ -1,21 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { FilterOptions } from '@/lib/video-editor'
 
 interface FiltersControlsProps {
   onApplyFilters: (filters: FilterOptions) => void
+  onRemove?: () => void
+  hasQueued?: boolean
   disabled?: boolean
-  queueMode?: boolean
   className?: string
 }
 
 export function FiltersControls({
   onApplyFilters,
+  onRemove,
+  hasQueued = false,
   disabled = false,
-  queueMode = false,
   className
 }: FiltersControlsProps) {
   const [brightness, setBrightness] = useState(0)
@@ -25,15 +27,37 @@ export function FiltersControls({
 
   const hasChanges = brightness !== 0 || contrast !== 0 || saturation !== 1 || blur !== 0
 
+  const applyFilters = (b: number, c: number, s: number, bl: number) => {
+    if (b !== 0 || c !== 0 || s !== 1 || bl !== 0) {
+      setTimeout(() => onApplyFilters({ brightness: b, contrast: c, saturation: s, blur: bl }), 100)
+    }
+  }
+
+  const handleBrightnessChange = (value: number) => {
+    setBrightness(value)
+    applyFilters(value, contrast, saturation, blur)
+  }
+
+  const handleContrastChange = (value: number) => {
+    setContrast(value)
+    applyFilters(brightness, value, saturation, blur)
+  }
+
+  const handleSaturationChange = (value: number) => {
+    setSaturation(value)
+    applyFilters(brightness, contrast, value, blur)
+  }
+
+  const handleBlurChange = (value: number) => {
+    setBlur(value)
+    applyFilters(brightness, contrast, saturation, value)
+  }
+
   const handleReset = () => {
     setBrightness(0)
     setContrast(0)
     setSaturation(1)
     setBlur(0)
-  }
-
-  const handleApply = () => {
-    onApplyFilters({ brightness, contrast, saturation, blur })
   }
 
   return (
@@ -49,7 +73,7 @@ export function FiltersControls({
             max="1"
             step="0.05"
             value={brightness}
-            onChange={(e) => setBrightness(parseFloat(e.target.value))}
+            onChange={(e) => handleBrightnessChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -70,7 +94,7 @@ export function FiltersControls({
             max="1"
             step="0.05"
             value={contrast}
-            onChange={(e) => setContrast(parseFloat(e.target.value))}
+            onChange={(e) => handleContrastChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -91,7 +115,7 @@ export function FiltersControls({
             max="3"
             step="0.05"
             value={saturation}
-            onChange={(e) => setSaturation(parseFloat(e.target.value))}
+            onChange={(e) => handleSaturationChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -112,7 +136,7 @@ export function FiltersControls({
             max="20"
             step="1"
             value={blur}
-            onChange={(e) => setBlur(parseFloat(e.target.value))}
+            onChange={(e) => handleBlurChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -123,31 +147,20 @@ export function FiltersControls({
         </div>
       </div>
 
-      <div className="flex gap-2">
+      {hasQueued && onRemove && (
         <button
-          onClick={handleReset}
-          disabled={disabled || !hasChanges}
+          onClick={onRemove}
+          disabled={disabled}
           className={cn(
-            'flex-1 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-            'bg-gray-600 hover:bg-gray-700 text-white',
-            (disabled || !hasChanges) && 'opacity-50 cursor-not-allowed'
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+            'bg-red-600 hover:bg-red-700 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
           )}
         >
-          Reset
+          <X className="w-4 h-4" />
+          <span>Remove from Queue</span>
         </button>
-        <button
-          onClick={handleApply}
-          disabled={disabled || !hasChanges}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-            'bg-blue-600 hover:bg-blue-700 text-white',
-            (disabled || !hasChanges) && 'opacity-50 cursor-not-allowed'
-          )}
-        >
-          <Sparkles className="w-4 h-4" />
-          <span>{queueMode ? 'Add to Queue' : 'Apply Filters'}</span>
-        </button>
-      </div>
+      )}
 
       {!hasChanges && (
         <div className="p-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg">

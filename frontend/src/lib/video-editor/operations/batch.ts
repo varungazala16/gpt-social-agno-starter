@@ -33,6 +33,7 @@ export async function processBatch(
   let currentSrc = videoSrc
   let currentBlob: Blob | null = null
   let currentFormat: 'mp4' | 'webm' = 'mp4'
+  const createdBlobUrls: string[] = [] // Track created URLs for cleanup
 
   // Process operations sequentially
   for (let i = 0; i < operations.length; i++) {
@@ -108,24 +109,24 @@ export async function processBatch(
       currentBlob = result.blob
       currentFormat = result.format
 
-      // For next iteration, we need to write the blob back to FFmpeg
+      // For next iteration, create a Blob URL instead of using FFmpeg's virtual filesystem
       if (i < operations.length - 1) {
-        // Convert blob to temporary file for next operation
-        const arrayBuffer = await currentBlob.arrayBuffer()
-        const uint8Array = new Uint8Array(arrayBuffer)
-        await ffmpeg.writeFile('temp-input.mp4', uint8Array)
-        currentSrc = 'temp-input.mp4'
+        // Create a Blob URL that the next operation can fetch
+        currentSrc = URL.createObjectURL(currentBlob)
+        createdBlobUrls.push(currentSrc) // Track for cleanup
       }
     } catch (error) {
+      // Cleanup created Blob URLs on error
+      for (const url of createdBlobUrls) {
+        URL.revokeObjectURL(url)
+      }
       throw new Error(`Failed at operation ${i + 1}/${operations.length} (${getOperationName(operation)}): ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
-  // Cleanup temp file if it exists
-  try {
-    await ffmpeg.deleteFile('temp-input.mp4')
-  } catch {
-    // Ignore cleanup errors
+  // Cleanup created Blob URLs
+  for (const url of createdBlobUrls) {
+    URL.revokeObjectURL(url)
   }
 
   if (!currentBlob) {

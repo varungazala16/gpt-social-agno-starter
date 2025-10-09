@@ -1,21 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-import { Crop } from 'lucide-react'
+import { Crop, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ASPECT_RATIO_PRESETS, type AspectRatio } from '@/lib/video-editor'
 
 interface CropControlsProps {
   onCrop: (aspectRatio: AspectRatio, mode: 'letterbox' | 'crop') => void
+  onRemove?: () => void
+  hasQueued?: boolean
   disabled?: boolean
-  queueMode?: boolean
   className?: string
 }
 
 export function CropControls({
   onCrop,
+  onRemove,
+  hasQueued = false,
   disabled = false,
-  queueMode = false,
   className
 }: CropControlsProps) {
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<AspectRatio>(
@@ -23,8 +25,16 @@ export function CropControls({
   )
   const [mode, setMode] = useState<'letterbox' | 'crop'>('letterbox')
 
-  const handleApply = () => {
-    onCrop(selectedAspectRatio, mode)
+  const handleAspectRatioChange = (ratio: AspectRatio) => {
+    setSelectedAspectRatio(ratio)
+    // Auto-add to queue when aspect ratio changes
+    setTimeout(() => onCrop(ratio, mode), 100) // Small delay to batch rapid changes
+  }
+
+  const handleModeChange = (newMode: 'letterbox' | 'crop') => {
+    setMode(newMode)
+    // Auto-add to queue when mode changes
+    setTimeout(() => onCrop(selectedAspectRatio, newMode), 100) // Small delay to batch rapid changes
   }
 
   return (
@@ -38,7 +48,7 @@ export function CropControls({
             {ASPECT_RATIO_PRESETS.map((ratio) => (
               <button
                 key={ratio.label}
-                onClick={() => setSelectedAspectRatio(ratio)}
+                onClick={() => handleAspectRatioChange(ratio)}
                 disabled={disabled}
                 className={cn(
                   'px-3 py-2 text-sm rounded-lg border-2 transition-all',
@@ -60,7 +70,7 @@ export function CropControls({
           </label>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => setMode('letterbox')}
+              onClick={() => handleModeChange('letterbox')}
               disabled={disabled}
               className={cn(
                 'px-3 py-2 text-sm rounded-lg border-2 transition-all',
@@ -76,7 +86,7 @@ export function CropControls({
               </span>
             </button>
             <button
-              onClick={() => setMode('crop')}
+              onClick={() => handleModeChange('crop')}
               disabled={disabled}
               className={cn(
                 'px-3 py-2 text-sm rounded-lg border-2 transition-all',
@@ -103,18 +113,20 @@ export function CropControls({
         </div>
       </div>
 
-      <button
-        onClick={handleApply}
-        disabled={disabled}
-        className={cn(
-          'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-          'bg-blue-600 hover:bg-blue-700 text-white',
-          disabled && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        <Crop className="w-4 h-4" />
-        <span>{queueMode ? 'Add to Queue' : 'Apply Aspect Ratio'}</span>
-      </button>
+      {hasQueued && onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={disabled}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+            'bg-red-600 hover:bg-red-700 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          <X className="w-4 h-4" />
+          <span>Remove from Queue</span>
+        </button>
+      )}
     </div>
   )
 }

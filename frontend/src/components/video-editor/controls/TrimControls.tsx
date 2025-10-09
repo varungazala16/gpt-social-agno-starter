@@ -1,6 +1,6 @@
 'use client'
 
-import { Scissors } from 'lucide-react'
+import { Scissors, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface TrimControlsProps {
@@ -10,8 +10,9 @@ interface TrimControlsProps {
   onStartTimeChange: (time: number) => void
   onEndTimeChange: (time: number) => void
   onTrim: () => void
+  onRemove?: () => void
+  hasQueued?: boolean
   disabled?: boolean
-  queueMode?: boolean
   className?: string
 }
 
@@ -28,11 +29,28 @@ export function TrimControls({
   onStartTimeChange,
   onEndTimeChange,
   onTrim,
+  onRemove,
+  hasQueued = false,
   disabled = false,
-  queueMode = false,
   className
 }: TrimControlsProps) {
   const isValid = startTime < endTime
+
+  const handleStartTimeChange = (time: number) => {
+    onStartTimeChange(time)
+    // Auto-add to queue when slider changes
+    if (isValid) {
+      setTimeout(() => onTrim(), 100) // Small delay to batch rapid changes
+    }
+  }
+
+  const handleEndTimeChange = (time: number) => {
+    onEndTimeChange(time)
+    // Auto-add to queue when slider changes
+    if (isValid) {
+      setTimeout(() => onTrim(), 100) // Small delay to batch rapid changes
+    }
+  }
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -47,7 +65,7 @@ export function TrimControls({
             max={duration}
             step="0.1"
             value={startTime}
-            onChange={(e) => onStartTimeChange(parseFloat(e.target.value))}
+            onChange={(e) => handleStartTimeChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -63,7 +81,7 @@ export function TrimControls({
             max={duration}
             step="0.1"
             value={endTime}
-            onChange={(e) => onEndTimeChange(parseFloat(e.target.value))}
+            onChange={(e) => handleEndTimeChange(parseFloat(e.target.value))}
             className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
             disabled={disabled}
           />
@@ -74,18 +92,20 @@ export function TrimControls({
         </p>
       </div>
 
-      <button
-        onClick={onTrim}
-        disabled={disabled || !isValid}
-        className={cn(
-          'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
-          'bg-blue-600 hover:bg-blue-700 text-white',
-          (disabled || !isValid) && 'opacity-50 cursor-not-allowed'
-        )}
-      >
-        <Scissors className="w-4 h-4" />
-        <span>{queueMode ? 'Add to Queue' : 'Trim Video'}</span>
-      </button>
+      {hasQueued && onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={disabled}
+          className={cn(
+            'w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm hover:shadow-md',
+            'bg-red-600 hover:bg-red-700 text-white',
+            disabled && 'opacity-50 cursor-not-allowed'
+          )}
+        >
+          <X className="w-4 h-4" />
+          <span>Remove from Queue</span>
+        </button>
+      )}
     </div>
   )
 }

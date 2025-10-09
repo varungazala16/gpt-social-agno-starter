@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useMemo } from 'react'
+import { forwardRef, useMemo, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import type { PreviewState } from '@/lib/video-editor/core/queue-types'
 
@@ -13,6 +13,37 @@ interface VideoPreviewProps {
 
 export const VideoPreview = forwardRef<HTMLVideoElement, VideoPreviewProps>(
   ({ src, previewState, onLoadedMetadata, className }, ref) => {
+    const localRef = useRef<HTMLVideoElement>(null)
+
+    // Forward ref to parent
+    useEffect(() => {
+      if (typeof ref === 'function') {
+        ref(localRef.current)
+      } else if (ref) {
+        ref.current = localRef.current
+      }
+    }, [ref])
+
+    // Calculate video src with Media Fragments for trim
+    const videoSrc = useMemo(() => {
+      if (!previewState?.trimStart && !previewState?.trimEnd) {
+        return src
+      }
+
+      // Build Media Fragment URI
+      // Format: video.mp4#t=start,end or video.mp4#t=start
+      const start = previewState.trimStart ?? 0
+      const end = previewState.trimEnd
+
+      if (end !== undefined && end > start) {
+        return `${src}#t=${start},${end}`
+      } else if (start > 0) {
+        return `${src}#t=${start}`
+      }
+
+      return src
+    }, [src, previewState?.trimStart, previewState?.trimEnd])
+
     // Calculate CSS transforms from preview state
     const videoStyle = useMemo(() => {
       if (!previewState) return {}
@@ -81,8 +112,8 @@ export const VideoPreview = forwardRef<HTMLVideoElement, VideoPreviewProps>(
         style={containerStyle}
       >
         <video
-          ref={ref}
-          src={src}
+          ref={localRef}
+          src={videoSrc}
           className="w-full h-full object-contain"
           controls
           onLoadedMetadata={onLoadedMetadata}

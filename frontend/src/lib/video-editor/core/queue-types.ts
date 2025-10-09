@@ -2,75 +2,24 @@
  * Queue types for batching video operations
  */
 
-import type {
-  TrimOptions,
-  CropOptions,
-  AspectRatio,
-  RotateOptions,
-  FlipOptions,
-  SpeedOptions,
-  VolumeOptions,
-  FilterOptions
-} from './types'
-
 export interface QueuedOperation {
   id: string
   type: 'trim' | 'crop' | 'rotate' | 'flip' | 'speed' | 'volume' | 'filters'
   label: string
-  options: TrimOptions | CropOptions | RotateOptions | FlipOptions | SpeedOptions | VolumeOptions | FilterOptions
+  options: unknown // Flexible type to accommodate various operation options
   appliedPreview?: boolean // Whether CSS/canvas preview is applied
 }
 
-export interface TrimQueuedOperation extends QueuedOperation {
-  type: 'trim'
-  options: TrimOptions
-}
-
-export interface CropQueuedOperation extends QueuedOperation {
-  type: 'crop'
-  options: AspectRatio & { mode: 'letterbox' | 'crop' }
-}
-
-export interface RotateQueuedOperation extends QueuedOperation {
-  type: 'rotate'
-  options: RotateOptions
-}
-
-export interface FlipQueuedOperation extends QueuedOperation {
-  type: 'flip'
-  options: FlipOptions
-}
-
-export interface SpeedQueuedOperation extends QueuedOperation {
-  type: 'speed'
-  options: SpeedOptions
-}
-
-export interface VolumeQueuedOperation extends QueuedOperation {
-  type: 'volume'
-  options: VolumeOptions
-}
-
-export interface FiltersQueuedOperation extends QueuedOperation {
-  type: 'filters'
-  options: FilterOptions
-}
-
-export type TypedQueuedOperation =
-  | TrimQueuedOperation
-  | CropQueuedOperation
-  | RotateQueuedOperation
-  | FlipQueuedOperation
-  | SpeedQueuedOperation
-  | VolumeQueuedOperation
-  | FiltersQueuedOperation
-
 export interface OperationQueue {
-  operations: QueuedOperation[]
+  operations: Record<string, QueuedOperation> // Map of operation type to operation
   previewEnabled: boolean
 }
 
 export interface PreviewState {
+  // Trim state (handled via video element playback)
+  trimStart?: number
+  trimEnd?: number
+  // CSS-based preview states
   rotation: number // 0, 90, 180, 270
   flipH: boolean
   flipV: boolean

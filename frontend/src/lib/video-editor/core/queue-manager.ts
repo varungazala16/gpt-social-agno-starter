@@ -5,61 +5,65 @@
 import type { QueuedOperation, PreviewState } from './queue-types'
 
 export class QueueManager {
-  private operations: QueuedOperation[] = []
+  private operations: Record<string, QueuedOperation> = {}
   private listeners: Set<() => void> = new Set()
 
   /**
-   * Add operation to queue
+   * Add or update operation in queue (only one per type)
    */
   addOperation(operation: Omit<QueuedOperation, 'id'>): QueuedOperation {
     const newOp: QueuedOperation = {
       ...operation,
       id: `${operation.type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     }
-    this.operations.push(newOp)
+    // Store by type - overwrites any existing operation of same type
+    this.operations[operation.type] = newOp
     this.notifyListeners()
     return newOp
   }
 
   /**
-   * Remove operation from queue
+   * Remove operation from queue by type
    */
-  removeOperation(id: string): void {
-    this.operations = this.operations.filter(op => op.id !== id)
+  removeOperation(type: string): void {
+    delete this.operations[type]
     this.notifyListeners()
   }
 
   /**
-   * Reorder operation in queue
+   * Get specific operation by type
    */
-  reorderOperation(id: string, newIndex: number): void {
-    const currentIndex = this.operations.findIndex(op => op.id === id)
-    if (currentIndex === -1) return
-
-    const [operation] = this.operations.splice(currentIndex, 1)
-    this.operations.splice(newIndex, 0, operation)
-    this.notifyListeners()
+  getOperation(type: string): QueuedOperation | undefined {
+    return this.operations[type]
   }
 
   /**
-   * Get all operations in queue
+   * Get all operations as array
    */
   getOperations(): QueuedOperation[] {
-    return [...this.operations]
+    return Object.values(this.operations)
   }
 
   /**
    * Get operation count
    */
   getCount(): number {
-    return this.operations.length
+    return Object.keys(this.operations).length
+  }
+
+  /**
+   * Clear specific operation by type
+   */
+  clearOperation(type: string): void {
+    delete this.operations[type]
+    this.notifyListeners()
   }
 
   /**
    * Clear all operations
    */
   clear(): void {
-    this.operations = []
+    this.operations = {}
     this.notifyListeners()
   }
 
@@ -77,16 +81,23 @@ export class QueueManager {
       blur: 0
     }
 
-    for (const op of this.operations) {
+    // Iterate over operations map
+    for (const op of Object.values(this.operations)) {
       switch (op.type) {
+        case 'trim':
+          const trimOpts = op.options as { startTime: number; endTime: number }
+          state.trimStart = trimOpts.startTime
+          state.trimEnd = trimOpts.endTime
+          break
+
         case 'rotate':
-          state.rotation = (state.rotation + (op.options as { degrees: number }).degrees) % 360
+          state.rotation = (op.options as { degrees: number }).degrees
           break
 
         case 'flip':
           const flipOpts = op.options as { horizontal: boolean; vertical: boolean }
-          if (flipOpts.horizontal) state.flipH = !state.flipH
-          if (flipOpts.vertical) state.flipV = !state.flipV
+          state.flipH = flipOpts.horizontal
+          state.flipV = flipOpts.vertical
           break
 
         case 'filters':

@@ -28,14 +28,19 @@ export function useQueueMode() {
     return queueManager.addOperation({ type, label, options })
   }, [queueManager])
 
-  // Remove operation from queue
-  const removeOperation = useCallback((id: string) => {
-    queueManager.removeOperation(id)
+  // Get specific operation by type
+  const getOperation = useCallback((type: string) => {
+    return queueManager.getOperation(type)
   }, [queueManager])
 
-  // Reorder operation
-  const reorderOperation = useCallback((id: string, newIndex: number) => {
-    queueManager.reorderOperation(id, newIndex)
+  // Remove operation from queue by type
+  const removeOperation = useCallback((type: string) => {
+    queueManager.removeOperation(type)
+  }, [queueManager])
+
+  // Clear specific operation by type
+  const clearOperation = useCallback((type: string) => {
+    queueManager.clearOperation(type)
   }, [queueManager])
 
   // Clear all operations
@@ -58,8 +63,9 @@ export function useQueueMode() {
     operations,
     operationCount: operations.length,
     addOperation,
+    getOperation,
     removeOperation,
-    reorderOperation,
+    clearOperation,
     clearQueue,
     previewState,
     previewEnabled,
