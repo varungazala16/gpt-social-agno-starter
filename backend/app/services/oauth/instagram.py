@@ -1,12 +1,13 @@
 import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import httpx
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+from app.models.social_account import Platform
 from app.schemas.social_account import SocialAccountCreate
 
 
@@ -25,12 +26,12 @@ class InstagramOAuth:
     ]
     STATE_LENGTH = 32
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client_id = settings.INSTAGRAM_CLIENT_ID
         self.client_secret = settings.INSTAGRAM_CLIENT_SECRET
         self.redirect_uri = settings.INSTAGRAM_REDIRECT_URI
 
-    def generate_authorization_url(self, state: Optional[str] = None) -> tuple[str, str]:
+    def generate_authorization_url(self, state: str | None = None) -> tuple[str, str]:
         """
         Generate Instagram OAuth authorization URL
 
@@ -52,7 +53,7 @@ class InstagramOAuth:
         authorization_url = f"{self.AUTHORIZATION_URL}?{urlencode(params)}"
         return authorization_url, state
 
-    async def exchange_code_for_token(self, code: str) -> dict:
+    async def exchange_code_for_token(self, code: str) -> dict[str, Any]:
         """
         Exchange authorization code for short-lived access token
 
@@ -80,9 +81,9 @@ class InstagramOAuth:
                     detail=f"Instagram token exchange failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def exchange_for_long_lived_token(self, short_lived_token: str) -> dict:
+    async def exchange_for_long_lived_token(self, short_lived_token: str) -> dict[str, Any]:
         """
         Exchange short-lived token for long-lived token (60 days)
 
@@ -108,9 +109,9 @@ class InstagramOAuth:
                     detail=f"Instagram long-lived token exchange failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def refresh_access_token(self, access_token: str) -> dict:
+    async def refresh_access_token(self, access_token: str) -> dict[str, Any]:
         """
         Refresh long-lived token (before it expires)
 
@@ -135,10 +136,10 @@ class InstagramOAuth:
                     detail=f"Instagram token refresh failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     def create_social_account_from_tokens(
-        self, token_response: dict, user_info: dict
+        self, token_response: dict[str, Any], user_info: dict[str, Any]
     ) -> SocialAccountCreate:
         """
         Create SocialAccountCreate object from Instagram API responses
@@ -151,11 +152,11 @@ class InstagramOAuth:
             SocialAccountCreate: Ready to save to database
         """
         expires_in = token_response.get("expires_in", 60 * 60 * 24 * 60)  # Default 60 days
-        token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        token_expires_at = datetime.now(UTC) + timedelta(seconds=expires_in)
 
         return SocialAccountCreate(
-            platform="instagram",
-            platform_user_id=token_response.get("user_id") or user_info.get("id"),
+            platform=Platform.INSTAGRAM,
+            platform_user_id=str(token_response.get("user_id") or user_info.get("id")),
             platform_username=user_info.get("username"),
             access_token=token_response["access_token"],
             refresh_token=None,  # Instagram uses token refresh, not refresh_token

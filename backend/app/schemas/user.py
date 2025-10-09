@@ -1,3 +1,5 @@
+from typing import Any
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -24,6 +26,7 @@ class UserOut(UserBase):
 
 class UserInDB(UserOut):
     """User with sensitive data from Supabase"""
+
     pass
 
 
@@ -35,13 +38,13 @@ class TokenResponse(BaseModel):
 
 class UserResponse(BaseModel):
     id: str
-    email: str
-    user_metadata: dict = {}
+    email: str | None
+    user_metadata: dict[str, Any] = {}
 
 
 class SignupResponse(BaseModel):
     user: UserResponse
-    session: dict
+    session: dict[str, Any]
 
 
 class LoginResponse(BaseModel):
@@ -54,4 +57,4 @@ class LoginResponse(BaseModel):
 class CurrentUserResponse(BaseModel):
     id: str
     email: str
-    user_metadata: dict
+    user_metadata: dict[str, Any]

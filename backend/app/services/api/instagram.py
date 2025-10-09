@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 import httpx
 from fastapi import HTTPException, status
 
@@ -7,10 +9,10 @@ class InstagramAPIClient:
 
     BASE_URL = "https://graph.instagram.com"
 
-    def __init__(self, access_token: str):
+    def __init__(self, access_token: str) -> None:
         self.access_token = access_token
 
-    async def get_user_info(self, fields: list[str] = None) -> dict:
+    async def get_user_info(self, fields: list[str] | None = None) -> dict[str, Any]:
         """
         Get Instagram user information
 
@@ -38,11 +40,11 @@ class InstagramAPIClient:
                     detail=f"Instagram user info fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     async def get_media(
-        self, limit: int = 25, fields: list[str] = None, after: str = None
-    ) -> dict:
+        self, limit: int = 25, fields: list[str] | None = None, after: str | None = None
+    ) -> dict[str, Any]:
         """
         Get user's Instagram media
 
@@ -65,7 +67,7 @@ class InstagramAPIClient:
                 "timestamp",
             ]
 
-        params = {
+        params: dict[str, str | int] = {
             "fields": ",".join(fields),
             "access_token": self.access_token,
             "limit": min(limit, 25),
@@ -86,11 +88,9 @@ class InstagramAPIClient:
                     detail=f"Instagram media fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def get_videos(
-        self, limit: int = 25, after: str = None
-    ) -> dict:
+    async def get_videos(self, limit: int = 25, after: str | None = None) -> dict[str, Any]:
         """
         Get user's Instagram videos (short-form content only, filtered to VIDEO type)
 
@@ -113,21 +113,18 @@ class InstagramAPIClient:
                 "permalink",
                 "timestamp",
             ],
-            after=after
+            after=after,
         )
 
         # Filter for VIDEO media type only
-        videos = [
-            item for item in media_response.get("data", [])
-            if item.get("media_type") == "VIDEO"
-        ]
+        videos = [item for item in media_response.get("data", []) if item.get("media_type") == "VIDEO"]
 
         return {
             "data": videos,
             "paging": media_response.get("paging", {}),
         }
 
-    async def get_media_insights(self, media_id: str, metrics: list[str] = None) -> dict:
+    async def get_media_insights(self, media_id: str, metrics: list[str] | None = None) -> dict[str, Any]:
         """
         Get insights for a specific media item
 
@@ -156,4 +153,4 @@ class InstagramAPIClient:
                     detail=f"Instagram insights fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())

@@ -1,13 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import auth, connections, tiktok, instagram, youtube
+from app.api.v1 import auth, connections, instagram, tiktok, youtube
 from app.core.config import settings
 
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
-)
+app = FastAPI(title=settings.PROJECT_NAME, openapi_url=f"{settings.API_V1_STR}/openapi.json")
 
 # CORS middleware
 app.add_middleware(
@@ -27,5 +24,5 @@ app.include_router(youtube.router, prefix=f"{settings.API_V1_STR}/youtube", tags
 
 
 @app.get("/")
-def read_root():
+def read_root() -> dict[str, str]:
     return {"message": "Welcome to SocialGPT API"}

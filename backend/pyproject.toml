@@ -31,5 +31,7 @@ plugins = ["pydantic.mypy"]
 module = [
     "supabase.*",
     "alembic.*",
+    "pydantic_settings",
+    "sqlalchemy.*",
 ]
 ignore_missing_imports = true

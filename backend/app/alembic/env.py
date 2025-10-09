@@ -1,16 +1,15 @@
-from logging.config import fileConfig
 import asyncio
+from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-from app.core.database import Base
-from app.core.config import settings
-
 # Import all models here for autogenerate to detect them
 import app.models  # noqa: F401
+from app.core.config import settings
+from app.core.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -45,9 +44,9 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=settings.SQLALCHEMY_DATABASE_URI,
+        url=str(settings.SQLALCHEMY_DATABASE_URI),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},

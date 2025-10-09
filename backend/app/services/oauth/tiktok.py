@@ -1,15 +1,15 @@
 import secrets
-import hashlib
-import base64
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import httpx
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+from app.models.social_account import Platform
 from app.schemas.social_account import SocialAccountCreate
+
 
 class TikTokOAuth:
     """TikTok OAuth 2.0 service for Web Login Kit with PKCE support"""
@@ -24,12 +24,12 @@ class TikTokOAuth:
     ]
     STATE_LENGTH = 32
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client_key = settings.TIKTOK_CLIENT_KEY
         self.client_secret = settings.TIKTOK_CLIENT_SECRET
         self.redirect_uri = settings.TIKTOK_REDIRECT_URI
 
-    def generate_authorization_url(self, state: Optional[str] = None) -> tuple[str, str]:
+    def generate_authorization_url(self, state: str | None = None) -> tuple[str, str]:
         """
         Generate TikTok OAuth authorization URL with PKCE
 
@@ -46,11 +46,11 @@ class TikTokOAuth:
             "redirect_uri": self.redirect_uri,
             "state": state,
         }
-        authorization_url = f"{self.AUTHORIZATION_URL}?{urlencode(params, safe=",")}"
+        authorization_url = f"{self.AUTHORIZATION_URL}?{urlencode(params, safe=',')}"
 
         return authorization_url, state
 
-    async def exchange_code_for_token(self, code: str, state: str) -> dict:
+    async def exchange_code_for_token(self, code: str, state: str) -> dict[str, Any]:
         """
         Exchange authorization code for access token
 
@@ -79,9 +79,9 @@ class TikTokOAuth:
                     detail=f"TikTok token exchange failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def refresh_access_token(self, refresh_token: str) -> dict:
+    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
         """
         Refresh access token using refresh token
 
@@ -109,10 +109,10 @@ class TikTokOAuth:
                     detail=f"TikTok token refresh failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     def create_social_account_from_tokens(
-        self, token_response: dict, user_info: dict
+        self, token_response: dict[str, Any], user_info: dict[str, Any]
     ) -> SocialAccountCreate:
         """
         Create SocialAccountCreate object from TikTok API responses
@@ -125,12 +125,12 @@ class TikTokOAuth:
             SocialAccountCreate: Ready to save to database
         """
         expires_in = token_response.get("expires_in", 60 * 60 * 24)  # Default 24h
-        token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        token_expires_at = datetime.now(UTC) + timedelta(seconds=expires_in)
 
         user_data = user_info.get("data", {}).get("user", {})
 
         return SocialAccountCreate(
-            platform="tiktok",
+            platform=Platform.TIKTOK,
             platform_user_id=user_data.get("open_id"),
             platform_username=user_data.get("username") or user_data.get("display_name"),
             access_token=token_response["access_token"],

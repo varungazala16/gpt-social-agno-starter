@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 import httpx
 from fastapi import HTTPException, status
 
@@ -7,11 +9,11 @@ class TikTokAPIClient:
 
     BASE_URL = "https://open.tiktokapis.com/v2"
 
-    def __init__(self, access_token: str):
+    def __init__(self, access_token: str) -> None:
         self.access_token = access_token
         self.headers = {"Authorization": f"Bearer {access_token}"}
 
-    async def get_user_info(self, fields: list[str] = None) -> dict:
+    async def get_user_info(self, fields: list[str] | None = None) -> dict[str, Any]:
         """
         Get TikTok user information
 
@@ -37,11 +39,9 @@ class TikTokAPIClient:
                     detail=f"TikTok user info fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def get_videos(
-        self, max_count: int = 20, cursor: int = 0, fields: list[str] = None
-    ) -> dict:
+    async def get_videos(self, max_count: int = 20, cursor: int = 0, fields: list[str] | None = None) -> dict[str, Any]:
         """
         Get user's TikTok videos
 
@@ -93,4 +93,4 @@ class TikTokAPIClient:
                     detail=f"TikTok video list fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
