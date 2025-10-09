@@ -16,6 +16,8 @@ greenlet = "*"
 httpx = "*"
 pydantic = "*"
 pydantic-settings = "*"
+sqlalchemy-utils = "*"
+cryptography = "*"
 
 [dev-packages]
 pytest = "*"

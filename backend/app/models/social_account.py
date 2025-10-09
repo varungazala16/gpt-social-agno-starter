@@ -6,7 +6,10 @@ from sqlalchemy import JSON, Column, DateTime, String, UniqueConstraint
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy_utils import EncryptedType  # type: ignore[import-untyped]
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine  # type: ignore[import-untyped]
 
+from app.core.config import settings
 from app.core.database import Base
 
 
@@ -25,8 +28,11 @@ class SocialAccount(Base):  # type: ignore[misc]
     platform_user_id = Column(String, nullable=False)
     platform_username = Column(String)
 
-    access_token = Column(String, nullable=False)  # TODO: Encrypt in production
-    refresh_token = Column(String)  # TODO: Encrypt in production
+    access_token = Column(
+        EncryptedType(String, key=settings.SQLALCHEMY_ENCRYPTION_KEY, engine=AesEngine),
+        nullable=False,
+    )
+    refresh_token = Column(EncryptedType(String, key=settings.SQLALCHEMY_ENCRYPTION_KEY, engine=AesEngine))
     token_expires_at = Column(DateTime(timezone=True))
     scopes = Column(JSON)
     platform_metadata = Column(JSON)
