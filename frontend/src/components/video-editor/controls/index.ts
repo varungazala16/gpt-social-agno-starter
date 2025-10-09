@@ -1,0 +1,6 @@
+export { TrimControls } from './TrimControls'
+export { CropControls } from './CropControls'
+export { RotateControls } from './RotateControls'
+export { SpeedControls } from './SpeedControls'
+export { VolumeControls } from './VolumeControls'
+export { FiltersControls } from './FiltersControls'
