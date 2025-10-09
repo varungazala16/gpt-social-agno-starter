@@ -1,7 +1,8 @@
-from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Any
 from uuid import UUID
+
+from pydantic import BaseModel
 
 from app.models.social_account import Platform
 
@@ -9,15 +10,15 @@ from app.models.social_account import Platform
 class SocialAccountBase(BaseModel):
     platform: Platform
     platform_user_id: str
-    platform_username: Optional[str] = None
-    scopes: Optional[list[str]] = None
-    platform_metadata: Optional[dict] = None
+    platform_username: str | None = None
+    scopes: list[str] | None = None
+    platform_metadata: dict[str, Any] | None = None
 
 
 class SocialAccountCreate(SocialAccountBase):
     access_token: str
-    refresh_token: Optional[str] = None
-    token_expires_at: Optional[datetime] = None
+    refresh_token: str | None = None
+    token_expires_at: datetime | None = None
 
 
 class SocialAccountResponse(SocialAccountBase):
@@ -25,7 +26,7 @@ class SocialAccountResponse(SocialAccountBase):
     user_id: UUID
     created_at: datetime
     updated_at: datetime
-    token_expires_at: Optional[datetime] = None
+    token_expires_at: datetime | None = None
 
     class Config:
         from_attributes = True
@@ -34,7 +35,7 @@ class SocialAccountResponse(SocialAccountBase):
 class OAuthCallbackResponse(BaseModel):
     success: bool
     message: str
-    account: Optional[SocialAccountResponse] = None
+    account: SocialAccountResponse | None = None
 
 
 class OAuthAuthorizeResponse(BaseModel):

@@ -1,3 +1,5 @@
+from typing import Any, cast
+
 import httpx
 from fastapi import HTTPException, status
 
@@ -7,11 +9,11 @@ class YouTubeAPIClient:
 
     BASE_URL = "https://www.googleapis.com/youtube/v3"
 
-    def __init__(self, access_token: str):
+    def __init__(self, access_token: str) -> None:
         self.access_token = access_token
         self.headers = {"Authorization": f"Bearer {access_token}"}
 
-    async def get_channel_info(self, part: list[str] = None) -> dict:
+    async def get_channel_info(self, part: list[str] | None = None) -> dict[str, Any]:
         """
         Get YouTube channel information
 
@@ -40,14 +42,14 @@ class YouTubeAPIClient:
                     detail=f"YouTube channel info fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     async def get_videos(
         self,
         max_results: int = 25,
-        page_token: str = None,
-        part: list[str] = None,
-    ) -> dict:
+        page_token: str | None = None,
+        part: list[str] | None = None,
+    ) -> dict[str, Any]:
         """
         Get user's YouTube videos
 
@@ -65,10 +67,7 @@ class YouTubeAPIClient:
         # First, get the uploads playlist ID
         channel_info = await self.get_channel_info(part=["contentDetails"])
         uploads_playlist_id = (
-            channel_info.get("items", [{}])[0]
-            .get("contentDetails", {})
-            .get("relatedPlaylists", {})
-            .get("uploads")
+            channel_info.get("items", [{}])[0].get("contentDetails", {}).get("relatedPlaylists", {}).get("uploads")
         )
 
         if not uploads_playlist_id:
@@ -99,13 +98,13 @@ class YouTubeAPIClient:
                     detail=f"YouTube videos fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     async def get_shorts(
         self,
         max_results: int = 25,
-        page_token: str = None,
-    ) -> dict:
+        page_token: str | None = None,
+    ) -> dict[str, Any]:
         """
         Get user's YouTube Shorts (videos with duration <= 60 seconds)
 
@@ -118,9 +117,7 @@ class YouTubeAPIClient:
         """
         # Get all videos first
         videos_response = await self.get_videos(
-            max_results=max_results,
-            page_token=page_token,
-            part=["snippet", "contentDetails"]
+            max_results=max_results, page_token=page_token, part=["snippet", "contentDetails"]
         )
 
         # Filter for shorts (duration <= 60 seconds)
@@ -168,7 +165,7 @@ class YouTubeAPIClient:
         import re
 
         # Parse ISO 8601 duration
-        match = re.match(r'PT(?:(\d+)M)?(?:(\d+)S)?', duration)
+        match = re.match(r"PT(?:(\d+)M)?(?:(\d+)S)?", duration)
         if not match:
             return False
 
@@ -178,7 +175,7 @@ class YouTubeAPIClient:
 
         return total_seconds <= 60
 
-    async def get_video_analytics(self, video_id: str, metrics: list[str] = None) -> dict:
+    async def get_video_analytics(self, video_id: str, metrics: list[str] | None = None) -> dict[str, Any]:
         """
         Get analytics for a specific video
 
@@ -208,4 +205,4 @@ class YouTubeAPIClient:
                     detail=f"YouTube video analytics fetch failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())

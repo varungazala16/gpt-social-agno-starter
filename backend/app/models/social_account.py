@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, DateTime, Enum as SQLEnum, JSON, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime, timezone
 import enum
 import uuid
+from datetime import UTC, datetime
+
+from sqlalchemy import JSON, Column, DateTime, String, UniqueConstraint
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
 
@@ -13,12 +16,12 @@ class Platform(str, enum.Enum):
     YOUTUBE = "youtube"
 
 
-class SocialAccount(Base):
+class SocialAccount(Base):  # type: ignore[misc]
     __tablename__ = "social_accounts"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), nullable=False, index=True)  # References Supabase user
-    platform = Column(SQLEnum(Platform), nullable=False)
+    platform: Mapped[Platform] = mapped_column(SQLEnum(Platform), nullable=False)
     platform_user_id = Column(String, nullable=False)
     platform_username = Column(String)
 
@@ -28,9 +31,7 @@ class SocialAccount(Base):
     scopes = Column(JSON)
     platform_metadata = Column(JSON)
 
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC), onupdate=lambda: datetime.now(UTC))
 
-    __table_args__ = (
-        UniqueConstraint('user_id', 'platform', name='uq_user_platform'),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "platform", name="uq_user_platform"),)

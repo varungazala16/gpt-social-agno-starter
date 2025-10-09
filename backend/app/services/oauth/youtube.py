@@ -1,12 +1,13 @@
 import secrets
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 from urllib.parse import urlencode
 
 import httpx
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+from app.models.social_account import Platform
 from app.schemas.social_account import SocialAccountCreate
 
 
@@ -21,12 +22,12 @@ class YouTubeOAuth:
     ]
     STATE_LENGTH = 32
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.client_id = settings.YOUTUBE_CLIENT_ID
         self.client_secret = settings.YOUTUBE_CLIENT_SECRET
         self.redirect_uri = settings.YOUTUBE_REDIRECT_URI
 
-    def generate_authorization_url(self, state: Optional[str] = None) -> tuple[str, str]:
+    def generate_authorization_url(self, state: str | None = None) -> tuple[str, str]:
         """
         Generate YouTube OAuth authorization URL
 
@@ -49,7 +50,7 @@ class YouTubeOAuth:
         authorization_url = f"{self.AUTHORIZATION_URL}?{urlencode(params)}"
         return authorization_url, state
 
-    async def exchange_code_for_token(self, code: str) -> dict:
+    async def exchange_code_for_token(self, code: str) -> dict[str, Any]:
         """
         Exchange authorization code for access token
 
@@ -77,9 +78,9 @@ class YouTubeOAuth:
                     detail=f"YouTube token exchange failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
-    async def refresh_access_token(self, refresh_token: str) -> dict:
+    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
         """
         Refresh access token using refresh token
 
@@ -106,7 +107,7 @@ class YouTubeOAuth:
                     detail=f"YouTube token refresh failed: {response.text}",
                 )
 
-            return response.json()
+            return cast(dict[str, Any], response.json())
 
     async def revoke_token(self, token: str) -> None:
         """
@@ -128,7 +129,7 @@ class YouTubeOAuth:
                 )
 
     def create_social_account_from_tokens(
-        self, token_response: dict, user_info: dict
+        self, token_response: dict[str, Any], user_info: dict[str, Any]
     ) -> SocialAccountCreate:
         """
         Create SocialAccountCreate object from YouTube API responses
@@ -141,12 +142,12 @@ class YouTubeOAuth:
             SocialAccountCreate: Ready to save to database
         """
         expires_in = token_response.get("expires_in", 60 * 60)  # Default 1 hour
-        token_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+        token_expires_at = datetime.now(UTC) + timedelta(seconds=expires_in)
 
         snippet = user_info.get("items", [{}])[0].get("snippet", {})
 
         return SocialAccountCreate(
-            platform="youtube",
+            platform=Platform.YOUTUBE,
             platform_user_id=user_info.get("items", [{}])[0].get("id"),
             platform_username=snippet.get("title"),
             access_token=token_response["access_token"],

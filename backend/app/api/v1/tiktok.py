@@ -1,19 +1,21 @@
+from typing import Any
+from uuid import UUID
+
 from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select, update
-from uuid import UUID
 
 from app.core.auth import User
 from app.core.database import Database
-from app.models.social_account import SocialAccount, Platform
+from app.models.social_account import Platform, SocialAccount
 from app.schemas.social_account import OAuthAuthorizeResponse, OAuthCallbackResponse, SocialAccountResponse
-from app.services.oauth.tiktok import TikTokOAuth
 from app.services.api.tiktok import TikTokAPIClient
+from app.services.oauth.tiktok import TikTokOAuth
 
 router = APIRouter()
 
 
 @router.get("/oauth2/authorize", response_model=OAuthAuthorizeResponse)
-async def tiktok_authorize(current_user: User):
+async def tiktok_authorize(current_user: User) -> OAuthAuthorizeResponse:
     """Initiate TikTok OAuth flow"""
     oauth = TikTokOAuth()
 
@@ -23,10 +25,7 @@ async def tiktok_authorize(current_user: User):
 
     # TODO: Store state in Redis for CSRF protection and to verify in callback
 
-    return OAuthAuthorizeResponse(
-        authorization_url=authorization_url,
-        state=state
-    )
+    return OAuthAuthorizeResponse(authorization_url=authorization_url, state=state)
 
 
 @router.get("/oauth2/callback", response_model=OAuthCallbackResponse)
@@ -34,18 +33,15 @@ async def tiktok_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from TikTok"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-):
+) -> OAuthCallbackResponse:
     """Handle TikTok OAuth callback (public endpoint)"""
 
     # Extract user_id from state
     # TODO: Verify state parameter against stored value in Redis for CSRF protection
     try:
         user_id = UUID(state)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid state parameter"
-        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state parameter") from e
 
     oauth = TikTokOAuth()
 
@@ -62,10 +58,7 @@ async def tiktok_callback(
 
         # Check if account already exists
         result = await db.execute(
-            select(SocialAccount).where(
-                SocialAccount.user_id == user_id,
-                SocialAccount.platform == Platform.TIKTOK
-            )
+            select(SocialAccount).where(SocialAccount.user_id == user_id, SocialAccount.platform == Platform.TIKTOK)
         )
         existing_account = result.scalar_one_or_none()
 
@@ -89,10 +82,7 @@ async def tiktok_callback(
             account = existing_account
         else:
             # Create new account
-            account = SocialAccount(
-                user_id=user_id,
-                **social_account_data.model_dump()
-            )
+            account = SocialAccount(user_id=user_id, **social_account_data.model_dump())
             db.add(account)
             await db.commit()
             await db.refresh(account)
@@ -100,35 +90,28 @@ async def tiktok_callback(
         return OAuthCallbackResponse(
             success=True,
             message="TikTok account connected successfully",
-            account=SocialAccountResponse.model_validate(account)
+            account=SocialAccountResponse.model_validate(account),
         )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"TikTok OAuth failed: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"TikTok OAuth failed: {str(e)}") from e
 
 
 @router.get("/account", response_model=SocialAccountResponse)
 async def get_tiktok_account(
     current_user: User,
     db: Database,
-):
+) -> SocialAccountResponse:
     """Get user's connected TikTok account"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.TIKTOK
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.TIKTOK
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No TikTok account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No TikTok account connected")
 
     return SocialAccountResponse.model_validate(account)
 
@@ -137,21 +120,17 @@ async def get_tiktok_account(
 async def disconnect_tiktok(
     current_user: User,
     db: Database,
-):
+) -> dict[str, Any]:
     """Disconnect TikTok account"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.TIKTOK
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.TIKTOK
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No TikTok account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No TikTok account connected")
 
     await db.delete(account)
     await db.commit()
@@ -165,23 +144,19 @@ async def get_tiktok_videos(
     db: Database,
     max_count: int = Query(20, ge=1, le=20),
     cursor: int = Query(0, ge=0),
-):
+) -> dict[str, Any]:
     """Get user's TikTok videos"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.TIKTOK
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.TIKTOK
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No TikTok account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No TikTok account connected")
 
-    api_client = TikTokAPIClient(account.access_token)
+    api_client = TikTokAPIClient(str(account.access_token))
     videos = await api_client.get_videos(max_count=max_count, cursor=cursor)
 
     return videos

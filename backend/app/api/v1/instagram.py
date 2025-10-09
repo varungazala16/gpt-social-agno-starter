@@ -1,20 +1,21 @@
-from fastapi import APIRouter, HTTPException, Query, status, Response
-from sqlalchemy import select, update
+from typing import Any
 from uuid import UUID
+
+from fastapi import APIRouter, HTTPException, Query, status
+from sqlalchemy import select, update
 
 from app.core.auth import User
 from app.core.database import Database
-from app.core.config import settings
-from app.models.social_account import SocialAccount, Platform
+from app.models.social_account import Platform, SocialAccount
 from app.schemas.social_account import OAuthAuthorizeResponse, OAuthCallbackResponse, SocialAccountResponse
-from app.services.oauth.instagram import InstagramOAuth
 from app.services.api.instagram import InstagramAPIClient
+from app.services.oauth.instagram import InstagramOAuth
 
 router = APIRouter()
 
 
 @router.get("/oauth2/authorize", response_model=OAuthAuthorizeResponse)
-async def instagram_authorize(current_user: User):
+async def instagram_authorize(current_user: User) -> OAuthAuthorizeResponse:
     """Initiate Instagram OAuth flow"""
     oauth = InstagramOAuth()
 
@@ -24,10 +25,7 @@ async def instagram_authorize(current_user: User):
 
     # TODO: Store state in Redis for CSRF protection and to verify in callback
 
-    return OAuthAuthorizeResponse(
-        authorization_url=authorization_url,
-        state=state
-    )
+    return OAuthAuthorizeResponse(authorization_url=authorization_url, state=state)
 
 
 @router.get("/oauth2/callback")
@@ -35,18 +33,15 @@ async def instagram_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from Instagram"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-):
+) -> OAuthCallbackResponse:
     """Handle Instagram OAuth callback (public endpoint)"""
 
     # Extract user_id from state
     # TODO: Verify state parameter against stored value in Redis for CSRF protection
     try:
         user_id = UUID(state)
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid state parameter"
-        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state parameter") from e
 
     oauth = InstagramOAuth()
 
@@ -64,16 +59,11 @@ async def instagram_callback(
         user_info = await api_client.get_user_info()
 
         # Create social account object
-        social_account_data = oauth.create_social_account_from_tokens(
-            long_lived_token_response, user_info
-        )
+        social_account_data = oauth.create_social_account_from_tokens(long_lived_token_response, user_info)
 
         # Check if account already exists
         result = await db.execute(
-            select(SocialAccount).where(
-                SocialAccount.user_id == user_id,
-                SocialAccount.platform == Platform.INSTAGRAM
-            )
+            select(SocialAccount).where(SocialAccount.user_id == user_id, SocialAccount.platform == Platform.INSTAGRAM)
         )
         existing_account = result.scalar_one_or_none()
 
@@ -97,10 +87,7 @@ async def instagram_callback(
             account = existing_account
         else:
             # Create new account
-            account = SocialAccount(
-                user_id=user_id,
-                **social_account_data.model_dump()
-            )
+            account = SocialAccount(user_id=user_id, **social_account_data.model_dump())
             db.add(account)
             await db.commit()
             await db.refresh(account)
@@ -108,35 +95,28 @@ async def instagram_callback(
         return OAuthCallbackResponse(
             success=True,
             message="Instagram account connected successfully",
-            account=SocialAccountResponse.model_validate(account)
+            account=SocialAccountResponse.model_validate(account),
         )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Instagram OAuth failed: {str(e)}"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Instagram OAuth failed: {str(e)}") from e
 
 
 @router.get("/account", response_model=SocialAccountResponse)
 async def get_instagram_account(
     current_user: User,
     db: Database,
-):
+) -> SocialAccountResponse:
     """Get user's connected Instagram account"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.INSTAGRAM
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.INSTAGRAM
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Instagram account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Instagram account connected")
 
     return SocialAccountResponse.model_validate(account)
 
@@ -145,21 +125,17 @@ async def get_instagram_account(
 async def disconnect_instagram(
     current_user: User,
     db: Database,
-):
+) -> dict[str, Any]:
     """Disconnect Instagram account"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.INSTAGRAM
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.INSTAGRAM
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Instagram account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Instagram account connected")
 
     await db.delete(account)
     await db.commit()
@@ -173,23 +149,19 @@ async def get_instagram_videos(
     db: Database,
     limit: int = Query(25, ge=1, le=25),
     after: str = Query(None, description="Pagination cursor"),
-):
+) -> dict[str, Any]:
     """Get user's Instagram videos (short-form content only, VIDEO media type)"""
     result = await db.execute(
         select(SocialAccount).where(
-            SocialAccount.user_id == UUID(current_user.id),
-            SocialAccount.platform == Platform.INSTAGRAM
+            SocialAccount.user_id == UUID(current_user.id), SocialAccount.platform == Platform.INSTAGRAM
         )
     )
     account = result.scalar_one_or_none()
 
     if not account:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Instagram account connected"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Instagram account connected")
 
-    api_client = InstagramAPIClient(account.access_token)
+    api_client = InstagramAPIClient(str(account.access_token))
     videos = await api_client.get_videos(limit=limit, after=after)
 
     return videos
