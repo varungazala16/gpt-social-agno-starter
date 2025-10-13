@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 
 from app.api.v1 import auth, connections, instagram, tiktok, youtube
 from app.core.config import settings
@@ -26,3 +27,13 @@ app.include_router(youtube.router, prefix=f"{settings.API_V1_STR}/youtube", tags
 @app.get("/")
 def read_root() -> dict[str, str]:
     return {"message": "Welcome to SocialGPT API"}
+
+
+@app.get("/health")
+def health_check() -> dict[str, str]:
+    return {"status": "healthy"}
+
+
+@app.get("/favicon.ico")
+def favicon() -> FileResponse:
+    return FileResponse("static/favicon.ico")

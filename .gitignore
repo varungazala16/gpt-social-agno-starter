@@ -48,3 +48,8 @@ storybook-static
 
 # Mise
 .mise.local.toml
+
+# Poetry
+**/poetry.lock
+**/__pycache__
+

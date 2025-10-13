@@ -1,3 +1,39 @@
+[tool.poetry]
+name = "gpt-social-backend"
+version = "0.1.0"
+description = "FastAPI backend for GPT.social engagement orchestration"
+authors = ["Scrollmark Team"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["standard"], version = "*"}
+uvicorn = {extras = ["standard"], version = "*"}
+alembic = "*"
+sqlalchemy = "*"
+supabase = "*"
+psycopg2-binary = "*"
+psycopg = {extras = ["binary"], version = "*"}
+asyncpg = "*"
+greenlet = "*"
+httpx = "*"
+pydantic = "*"
+pydantic-settings = "*"
+sqlalchemy-utils = "*"
+cryptography = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+pytest-asyncio = "*"
+ruff = "*"
+mypy = "*"
+pre-commit = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.ruff]
 line-length = 120
 target-version = "py311"

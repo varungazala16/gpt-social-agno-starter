@@ -114,4 +114,4 @@ class Settings(BaseSettings):
         return self
 
 
-settings = Settings()  # type: ignore[call-arg]  # load args from env
+settings = Settings()  # load args from env

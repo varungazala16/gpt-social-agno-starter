@@ -6,8 +6,8 @@ from sqlalchemy import JSON, Column, DateTime, String, UniqueConstraint
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy_utils import EncryptedType  # type: ignore[import-untyped]
-from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine  # type: ignore[import-untyped]
+from sqlalchemy_utils import EncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from app.core.config import settings
 from app.core.database import Base
