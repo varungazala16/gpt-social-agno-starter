@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Upload, Video, Library } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Upload, Video, Library, Settings } from 'lucide-react'
 import { VideoUpload } from '@/components/VideoUpload'
 import { VideoRecorder } from '@/components/VideoRecorder'
 import { VideoGallery } from '@/components/VideoGallery'
@@ -12,6 +13,7 @@ import { cn } from '@/lib/utils'
 type Tab = 'upload' | 'record' | 'gallery'
 
 export default function Home() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('gallery')
   const [selectedVideoForEdit, setSelectedVideoForEdit] = useState<string | null>(null)
   const [isEditorOpen, setIsEditorOpen] = useState(false)
@@ -58,7 +60,16 @@ export default function Home() {
                 Play, upload, record, and edit your videos
               </p>
             </div>
-            <UserProfile />
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/settings')}
+                className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                aria-label="Settings"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+              <UserProfile />
+            </div>
           </div>
         </div>
       </header>
@@ -70,7 +81,7 @@ export default function Home() {
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.id
-              
+
               return (
                 <button
                   key={tab.id}
