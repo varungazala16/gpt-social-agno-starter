@@ -93,7 +93,7 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
   }
 
   return (
-    <div className={cn('relative bg-black rounded-lg overflow-hidden', className)}>
+    <div className={cn('relative bg-black overflow-hidden', className)}>
       <video
         ref={videoRef}
         src={src}
@@ -101,7 +101,7 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
         onClick={togglePlay}
       />
       
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+      <div className="absolute bottom-0 left-0 right-0 p-4">
         {/* Progress bar */}
         <input
           type="range"
@@ -109,7 +109,7 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
           max={duration || 0}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-1 mb-3 bg-gray-600 rounded-lg appearance-none cursor-pointer slider"
+          className="w-full h-1 mb-3 cursor-pointer slider"
         />
         
         <div className="flex items-center justify-between gap-2">
@@ -117,34 +117,34 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={togglePlay}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              className="p-2"
               aria-label={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
-                <Pause className="w-5 h-5 text-white" />
+                <Pause className="w-5 h-5" />
               ) : (
-                <Play className="w-5 h-5 text-white" />
+                <Play className="w-5 h-5" />
               )}
             </button>
             
             <button
               onClick={handleRestart}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              className="p-2"
               aria-label="Restart"
             >
-              <RotateCcw className="w-4 h-4 text-white" />
+              <RotateCcw className="w-4 h-4" />
             </button>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleMute}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                className="p-2"
                 aria-label={isMuted ? 'Unmute' : 'Mute'}
               >
                 {isMuted ? (
-                  <VolumeX className="w-4 h-4 text-white" />
+                  <VolumeX className="w-4 h-4" />
                 ) : (
-                  <Volume2 className="w-4 h-4 text-white" />
+                  <Volume2 className="w-4 h-4" />
                 )}
               </button>
               <input
@@ -154,11 +154,11 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
                 step="0.1"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer hidden sm:block"
+                className="w-20 h-1 cursor-pointer hidden sm:block"
               />
             </div>
             
-            <span className="text-white text-sm">
+            <span className="text-sm">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
@@ -166,10 +166,10 @@ export function VideoPlayer({ src, className }: VideoPlayerProps) {
           {/* Right controls */}
           <button
             onClick={handleFullscreen}
-            className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            className="p-2"
             aria-label="Fullscreen"
           >
-            <Maximize className="w-4 h-4 text-white" />
+            <Maximize className="w-4 h-4" />
           </button>
         </div>
       </div>

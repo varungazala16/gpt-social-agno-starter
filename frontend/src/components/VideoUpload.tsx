@@ -57,23 +57,20 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
       <label
         htmlFor="video-upload"
         className={cn(
-          'flex flex-col items-center justify-center w-full min-h-[200px] border-2 border-dashed rounded-xl cursor-pointer transition-all',
-          'bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/50',
-          uploadMutation.isPending
-            ? 'opacity-50 cursor-not-allowed border-gray-300 dark:border-gray-700'
-            : 'border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600'
+          'flex flex-col items-center justify-center w-full min-h-[200px] cursor-pointer bg-white',
+          uploadMutation.isPending && 'opacity-50 cursor-not-allowed'
         )}
       >
         <div className="flex flex-col items-center justify-center p-6">
           {uploadMutation.isPending ? (
-            <Loader2 className="w-12 h-12 mb-4 text-blue-500 animate-spin" />
+            <Loader2 className="w-12 h-12 mb-4 animate-spin" />
           ) : (
-            <Upload className="w-12 h-12 mb-4 text-gray-400" />
+            <Upload className="w-12 h-12 mb-4" />
           )}
-          <p className="mb-2 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-            <span className="font-semibold">Click to upload</span> or drag and drop
+          <p className="mb-2 text-sm sm:text-base">
+            <span>Click to upload</span> or drag and drop
           </p>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-xs sm:text-sm">
             MP4, WebM, or OGG (MAX. 100MB)
           </p>
         </div>
@@ -88,8 +85,8 @@ export function VideoUpload({ onUploadSuccess, className }: VideoUploadProps) {
         />
       </label>
       {error && (
-        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mt-3 p-3 bg-red-50">
+          <p className="text-sm">{error}</p>
         </div>
       )}
     </div>

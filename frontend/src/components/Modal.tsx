@@ -35,7 +35,7 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -43,19 +43,19 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 rounded-xl shadow-2xl',
+          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white',
           className
         )}
       >
-        <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
           {title && (
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">
+            <h2 className="text-lg sm:text-xl">
               {title}
             </h2>
           )}
           <button
             onClick={onClose}
-            className="ml-auto p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="ml-auto p-2"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

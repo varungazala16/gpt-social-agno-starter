@@ -90,6 +90,17 @@ export class QueueManager {
           state.trimEnd = trimOpts.endTime
           break
 
+        case 'speed':
+          const speedOpts = op.options as { speed: number }
+          state.speed = speedOpts.speed
+          break
+
+        case 'crop':
+          const cropOpts = op.options as { width: number; height: number; label: string; mode: 'letterbox' | 'crop' }
+          state.cropAspectRatio = { width: cropOpts.width, height: cropOpts.height, label: cropOpts.label }
+          state.cropMode = cropOpts.mode
+          break
+
         case 'rotate':
           state.rotation = (op.options as { degrees: number }).degrees
           break

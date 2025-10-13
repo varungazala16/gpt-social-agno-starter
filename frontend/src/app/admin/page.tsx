@@ -26,33 +26,33 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
+      <header className="">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Admin Dashboard
           </h1>
-          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm ">
             Manage users and system settings
           </p>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <div className=" p-6">
+          <h2 className="text-xl  text-gray-900 dark:text-white mb-4">
             User Management
           </h2>
           
           <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-4 pb-3 border-b border-gray-200 dark:border-gray-700 font-medium text-sm text-gray-700 dark:text-gray-300">
+            <div className="grid grid-cols-3 gap-4 pb-3 border-b   text-sm ">
               <div>Email</div>
               <div>Created At</div>
               <div>Last Sign In</div>
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">
+              <div className="p-3  dark:bg-red-900/20200 dark:border-red-800">
+                <p className="text-sm ">
                   Error loading users: {error.message}
                 </p>
               </div>
@@ -62,15 +62,15 @@ export default async function AdminPage() {
               users.map((user) => (
                 <div
                   key={user.id}
-                  className="grid grid-cols-3 gap-4 py-3 border-b border-gray-100 dark:border-gray-700 text-sm"
+                  className="grid grid-cols-3 gap-4 py-3 border-b  text-sm"
                 >
                   <div className="text-gray-900 dark:text-white">
                     {user.email}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400">
+                  <div className="">
                     {new Date(user.created_at).toLocaleDateString()}
                   </div>
-                  <div className="text-gray-600 dark:text-gray-400">
+                  <div className="">
                     {user.last_sign_in_at
                       ? new Date(user.last_sign_in_at).toLocaleDateString()
                       : 'Never'}
@@ -78,23 +78,23 @@ export default async function AdminPage() {
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
+              <p className=" text-sm">
                 No users found
               </p>
             )}
           </div>
         </div>
 
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        <div className="mt-6  p-6">
+          <h2 className="text-xl  text-gray-900 dark:text-white mb-4">
             Admin Information
           </h2>
           <div className="space-y-2 text-sm">
-            <p className="text-gray-600 dark:text-gray-400">
-              <span className="font-medium">Current Admin:</span> {user.email}
+            <p className="">
+              <span className="">Current Admin:</span> {user.email}
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              <span className="font-medium">User ID:</span> {user.id}
+            <p className="">
+              <span className="">User ID:</span> {user.id}
             </p>
           </div>
         </div>

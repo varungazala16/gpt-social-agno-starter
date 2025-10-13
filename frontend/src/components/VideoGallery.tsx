@@ -55,7 +55,7 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
   if (error) {
     return (
       <div className={cn('text-center py-12', className)}>
-        <p className="text-red-500 dark:text-red-400">Error loading videos: {error.message}</p>
+        <p className="">Error loading videos: {error.message}</p>
       </div>
     )
   }
@@ -63,7 +63,7 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
   if (videos.length === 0) {
     return (
       <div className={cn('text-center py-12', className)}>
-        <p className="text-gray-500 dark:text-gray-400">No videos yet. Upload or record your first video!</p>
+        <p className="">No videos yet. Upload or record your first video!</p>
       </div>
     )
   }
@@ -74,18 +74,18 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
         const isDeleting = deleteMutation.isPending && deleteMutation.variables === video.filename
 
         return (
-          <div key={video.filename} className="group relative bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 border border-gray-200 dark:border-gray-800">
-            <div className="relative aspect-video bg-gray-100 dark:bg-gray-800">
+          <div key={video.filename} className="group relative bg-white overflow-hidden border">
+            <div className="relative aspect-video bg-gray-100">
               <VideoPlayer src={video.url} />
             </div>
 
             <div className="p-3 sm:p-4">
               <div className="flex items-start justify-between gap-2 mb-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                  <p className="text-sm truncate">
                     {video.filename}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="text-xs mt-0.5">
                     {new Date(parseInt(video.uploadedAt)).toLocaleDateString()}
                   </p>
                 </div>
@@ -94,7 +94,7 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
               <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => handleDownload(video.url, video.filename)}
-                  className="flex-1 flex items-center justify-center gap-1.5 p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors text-sm font-medium"
+                  className="flex-1 flex items-center justify-center gap-1.5 p-2 bg-blue-600 text-sm"
                   aria-label="Download video"
                   title="Download video"
                 >
@@ -104,7 +104,7 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
 
                 <button
                   onClick={() => handleEdit(video.url)}
-                  className="flex-1 flex items-center justify-center gap-1.5 p-2 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors text-sm font-medium"
+                  className="flex-1 flex items-center justify-center gap-1.5 p-2 text-green-600  dark: transition-colors text-sm font-medium"
                   aria-label="Edit video"
                   title="Edit video"
                 >
@@ -116,7 +116,7 @@ export function VideoGallery({ className, onEditVideo }: VideoGalleryProps) {
                   onClick={() => handleDelete(video.filename)}
                   disabled={isDeleting}
                   className={cn(
-                    'flex-1 flex items-center justify-center gap-1.5 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors text-sm font-medium',
+                    'flex-1 flex items-center justify-center gap-1.5 p-2 text-red-600  dark: transition-colors text-sm font-medium',
                     isDeleting && 'opacity-50 cursor-not-allowed'
                   )}
                   aria-label="Delete video"

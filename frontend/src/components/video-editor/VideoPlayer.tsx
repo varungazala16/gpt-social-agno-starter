@@ -12,7 +12,7 @@ interface VideoPlayerProps {
 export const VideoPlayer = forwardRef<HTMLVideoElement, VideoPlayerProps>(
   ({ src, onLoadedMetadata, className }, ref) => {
     return (
-      <div className={cn('aspect-video bg-black rounded-xl overflow-hidden shadow-lg', className)}>
+      <div className={cn('aspect-video bg-black overflow-hidden', className)}>
         <video
           ref={ref}
           src={src}

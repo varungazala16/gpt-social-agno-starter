@@ -16,7 +16,7 @@ import type { QueuedOperation, BatchProcessingOptions } from '../core/queue-type
 import type { ProcessingResult, VideoMetadata, AspectRatio } from '../core/types'
 
 export interface BatchProgressCallback {
-  (current: number, total: number, operation: string): void
+  (current: number, total: number, operation: string, subProgress?: number): void
 }
 
 export async function processBatch(
@@ -38,10 +38,20 @@ export async function processBatch(
   // Process operations sequentially
   for (let i = 0; i < operations.length; i++) {
     const operation = operations[i]
+    const operationName = getOperationName(operation)
 
-    // Report progress
+    // Report initial progress
     if (onProgress) {
-      onProgress(i, operations.length, getOperationName(operation))
+      onProgress(i, operations.length, operationName, 0)
+    }
+
+    // Set up FFmpeg progress listener for this operation
+    let progressHandler: ((event: { progress: number }) => void) | null = null
+    if (onProgress) {
+      progressHandler = ({ progress }: { progress: number }) => {
+        onProgress(i, operations.length, operationName, progress)
+      }
+      ffmpeg.on('progress', progressHandler)
     }
 
     try {
@@ -109,6 +119,11 @@ export async function processBatch(
       currentBlob = result.blob
       currentFormat = result.format
 
+      // Clean up FFmpeg progress listener
+      if (progressHandler) {
+        ffmpeg.off('progress', progressHandler)
+      }
+
       // For next iteration, create a Blob URL instead of using FFmpeg's virtual filesystem
       if (i < operations.length - 1) {
         // Create a Blob URL that the next operation can fetch
@@ -116,11 +131,16 @@ export async function processBatch(
         createdBlobUrls.push(currentSrc) // Track for cleanup
       }
     } catch (error) {
+      // Clean up FFmpeg progress listener on error
+      if (progressHandler) {
+        ffmpeg.off('progress', progressHandler)
+      }
+
       // Cleanup created Blob URLs on error
       for (const url of createdBlobUrls) {
         URL.revokeObjectURL(url)
       }
-      throw new Error(`Failed at operation ${i + 1}/${operations.length} (${getOperationName(operation)}): ${error instanceof Error ? error.message : 'Unknown error'}`)
+      throw new Error(`Failed at operation ${i + 1}/${operations.length} (${operationName}): ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

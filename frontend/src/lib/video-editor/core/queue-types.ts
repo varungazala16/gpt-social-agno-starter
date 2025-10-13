@@ -19,6 +19,11 @@ export interface PreviewState {
   // Trim state (handled via video element playback)
   trimStart?: number
   trimEnd?: number
+  // Speed state (handled via video playbackRate)
+  speed?: number
+  // Crop state (visual overlay preview)
+  cropAspectRatio?: { width: number; height: number; label: string }
+  cropMode?: 'letterbox' | 'crop'
   // CSS-based preview states
   rotation: number // 0, 90, 180, 270
   flipH: boolean
