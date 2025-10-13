@@ -22,6 +22,9 @@ pydantic = "*"
 pydantic-settings = "*"
 sqlalchemy-utils = "*"
 cryptography = "*"
+agno = "^2.1.4"
+openai = "^2.3.0"
+anthropic = "^0.69.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"

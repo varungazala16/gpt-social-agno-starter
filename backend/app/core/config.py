@@ -96,6 +96,11 @@ class Settings(BaseSettings):
     YOUTUBE_CLIENT_SECRET: str = ""
     YOUTUBE_REDIRECT_URI: str = ""
 
+    ## AI Configuration
+    OPENAI_API_KEY: str = ""
+    ANTHROPIC_API_KEY: str = ""
+    DEFAULT_LLM_MODEL: str = "claude-sonnet-4-20250514"
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (

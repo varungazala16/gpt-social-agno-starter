@@ -35,7 +35,7 @@ Simple frontend testbed for testing authentication with the SocialGPT API, inclu
 
    ```bash
    cd ..  # Go back to backend directory
-   uvicorn app.main:app --reload
+   poetry run uvicorn app.main:app --reload
    ```
 
    The API will be available at `http://localhost:8000`

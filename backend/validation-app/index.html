@@ -270,6 +270,46 @@
 
             <div id="instagramResponse" class="response"></div>
         </div>
+
+        <!-- AI Script Generator -->
+        <div class="card">
+            <h2>🤖 AI Script Generator</h2>
+            <p style="color: #666; margin-bottom: 20px;">Generate video scripts using Agno AI agent</p>
+
+            <form id="scriptForm">
+                <div class="form-group">
+                    <label for="scriptPrompt">Video Concept / Idea</label>
+                    <input type="text" id="scriptPrompt" required placeholder="e.g., A day in the life of a software engineer" value="Tips for productivity while working from home">
+                </div>
+                <div class="form-group">
+                    <label for="scriptPlatform">Platform</label>
+                    <select id="scriptPlatform" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                        <option value="tiktok">TikTok</option>
+                        <option value="instagram">Instagram Reels</option>
+                        <option value="youtube">YouTube Shorts</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="scriptDuration">Duration (seconds, optional)</label>
+                    <input type="number" id="scriptDuration" min="15" max="180" placeholder="e.g., 30">
+                </div>
+                <div class="form-group">
+                    <label for="scriptTone">Tone</label>
+                    <select id="scriptTone" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+                        <option value="casual">Casual</option>
+                        <option value="professional">Professional</option>
+                        <option value="humorous">Humorous</option>
+                        <option value="inspirational">Inspirational</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" style="background: #10b981;">Generate Script (Complete)</button>
+                    <button type="button" id="streamScriptBtn" style="background: #8b5cf6;">Stream Script</button>
+                </div>
+            </form>
+
+            <div id="scriptResponse" class="response"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

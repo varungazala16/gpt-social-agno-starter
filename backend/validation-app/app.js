@@ -48,6 +48,10 @@ function setupEventListeners() {
     // Instagram account & videos
     document.getElementById('getInstagramAccountBtn').addEventListener('click', getInstagramAccount);
     document.getElementById('getInstagramVideosBtn').addEventListener('click', getInstagramVideos);
+
+    // AI Script Generator
+    document.getElementById('scriptForm').addEventListener('submit', generateScriptComplete);
+    document.getElementById('streamScriptBtn').addEventListener('click', generateScriptStream);
 }
 
 function updateAuthStatus() {
@@ -563,5 +567,139 @@ async function getInstagramVideos() {
 
     } catch (error) {
         showResponse('instagramResponse', { error: error.message }, true);
+    }
+}
+
+
+// ===== AI Script Generator =====
+
+async function generateScriptComplete(e) {
+    e.preventDefault();
+
+    const prompt = document.getElementById('scriptPrompt').value;
+    const platform = document.getElementById('scriptPlatform').value;
+    const duration = document.getElementById('scriptDuration').value;
+    const tone = document.getElementById('scriptTone').value;
+
+    const payload = {
+        prompt,
+        platform,
+        tone
+    };
+
+    if (duration) {
+        payload.duration = parseInt(duration);
+    }
+
+    try {
+        showResponse('scriptResponse', { message: '⏳ Generating script...' });
+
+        const response = await fetch(`${API_BASE_URL}/agent/script`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentToken}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.detail || 'Failed to generate script');
+        }
+
+        showResponse('scriptResponse', {
+            message: '✅ Script Generated!',
+            platform: data.platform,
+            tone: data.tone,
+            script: data.script
+        });
+
+    } catch (error) {
+        showResponse('scriptResponse', { error: error.message }, true);
+    }
+}
+
+async function generateScriptStream(e) {
+    e.preventDefault();
+
+    const prompt = document.getElementById('scriptPrompt').value;
+    const platform = document.getElementById('scriptPlatform').value;
+    const duration = document.getElementById('scriptDuration').value;
+    const tone = document.getElementById('scriptTone').value;
+
+    const payload = {
+        prompt,
+        platform,
+        tone
+    };
+
+    if (duration) {
+        payload.duration = parseInt(duration);
+    }
+
+    try {
+        // Initialize response area
+        const responseEl = document.getElementById('scriptResponse');
+        responseEl.className = 'response show success';
+        responseEl.innerHTML = '<strong>🔄 Streaming script...</strong><br><br><pre id="streamingContent"></pre>';
+
+        const contentEl = document.getElementById('streamingContent');
+        let fullContent = '';
+
+        const response = await fetch(`${API_BASE_URL}/agent/script/stream`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to start streaming');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const jsonStr = line.substring(6);
+                    try {
+                        const data = JSON.parse(jsonStr);
+
+                        if (data.error) {
+                            throw new Error(data.error);
+                        }
+
+                        if (data.content) {
+                            fullContent += data.content;
+                            contentEl.textContent = fullContent;
+                        }
+
+                        if (data.done) {
+                            responseEl.innerHTML = '<strong>✅ Script Generated!</strong><br><br><pre>' + fullContent + '</pre>';
+                        }
+                    } catch (e) {
+                        // Skip invalid JSON lines
+                        if (e.message !== 'Unexpected end of JSON input') {
+                            throw e;
+                        }
+                    }
+                }
+            }
+        }
+
+    } catch (error) {
+        showResponse('scriptResponse', { error: error.message }, true);
     }
 }
