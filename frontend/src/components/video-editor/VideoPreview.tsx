@@ -84,12 +84,11 @@ interface VideoPreviewProps {
   previewState?: PreviewState
   onLoadedMetadata?: () => void
   aspectRatio?: AspectRatioPreset
-  onAspectRatioChange?: (ratio: AspectRatioPreset) => void
   className?: string
 }
 
 export const VideoPreview = forwardRef<HTMLVideoElement, VideoPreviewProps>(
-  ({ src, previewState, onLoadedMetadata, aspectRatio = '16:9', onAspectRatioChange, className }, ref) => {
+  ({ src, previewState, onLoadedMetadata, aspectRatio = '9:16', className }, ref) => {
     const localRef = useRef<HTMLVideoElement>(null)
     const ratioConfig = ASPECT_RATIOS[aspectRatio]
 
@@ -242,30 +241,6 @@ export const VideoPreview = forwardRef<HTMLVideoElement, VideoPreviewProps>(
           maxWidth: '1280px'
         }}
       >
-        {/* Aspect Ratio Selector */}
-        {onAspectRatioChange && (
-          <div className="absolute top-2 left-2 z-30">
-            <select
-              value={aspectRatio}
-              onChange={(e) => onAspectRatioChange(e.target.value as AspectRatioPreset)}
-              className={cn(
-                'text-xs px-2 py-1 rounded',
-                'bg-black/60 backdrop-blur-sm text-white',
-                'border border-white/20',
-                'hover:bg-black/80 transition-colors',
-                'cursor-pointer'
-              )}
-              title="Select aspect ratio"
-            >
-              {(Object.keys(ASPECT_RATIOS) as AspectRatioPreset[]).map((key) => (
-                <option key={key} value={key}>
-                  {ASPECT_RATIOS[key].label} - {ASPECT_RATIOS[key].description}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
         <div className="w-full h-full flex items-center justify-center relative">
           <video
             ref={localRef}

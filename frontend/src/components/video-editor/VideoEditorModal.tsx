@@ -5,7 +5,7 @@ import { Loader2, AlertCircle, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Modal } from '../Modal'
 import { AlertDialog } from '../AlertDialog'
-import { VideoPreview, AspectRatioPreset } from './VideoPreview'
+import { VideoPreview, AspectRatioPreset, ASPECT_RATIOS } from './VideoPreview'
 import { FloatingIconStack } from './FloatingIconStack'
 import { EffectSelectionOverlay } from './EffectSelectionOverlay'
 import { EffectEditorOverlay } from './EffectEditorOverlay'
@@ -48,7 +48,7 @@ export function VideoEditorModal({
   const [isSaving, setIsSaving] = useState(false)
   const [showEffectSelection, setShowEffectSelection] = useState(false)
   const [activeEffect, setActiveEffect] = useState<EffectType | null>(null)
-  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('16:9')
+  const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('9:16')
   const [alertDialog, setAlertDialog] = useState<{
     isOpen: boolean
     title: string
@@ -278,13 +278,19 @@ export function VideoEditorModal({
   }
 
   // Cancel processing handler
-  const handleCancelProcessing = () => {
+  const handleCancelProcessing = async () => {
     setIsCancelling(true)
-    setBatchProgress(null)
-    setProcessingError(null)
-    setIsCancelling(false)
-    // Note: FFmpeg processing cannot be truly cancelled mid-operation,
-    // but we can stop showing the overlay and prevent auto-save
+
+    try {
+      // Terminate the FFmpeg instance to immediately stop processing
+      const ffmpegManager = FFmpegManager.getInstance()
+      ffmpegManager.terminate()
+
+      // Reload FFmpeg for future operations
+      await ffmpegManager.load()
+    } catch (error) {
+      console.error('Error terminating FFmpeg:', error)
+    }
   }
 
   // Batch processing handler
@@ -312,9 +318,8 @@ export function VideoEditorModal({
         }
       )
 
-      // Check if cancelled during processing
+      // Check if cancelled during processing (shouldn't reach here if cancelled)
       if (isCancelling) {
-        setBatchProgress(null)
         return
       }
 
@@ -326,12 +331,25 @@ export function VideoEditorModal({
       clearQueue()
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to process operations'
-      setProcessingError(errorMessage)
-    } finally {
-      if (!isCancelling) {
-        setBatchProgress(null)
+      // Check if this was a user cancellation or termination
+      const errorMsg = error instanceof Error ? error.message : ''
+      const isCancellationError =
+        errorMsg === 'Processing cancelled by user' ||
+        errorMsg.includes('terminated') ||
+        errorMsg.includes('terminate()') ||
+        errorMsg.includes('FFmpeg not loaded') ||
+        isCancelling
+
+      if (!isCancellationError) {
+        // Only show error if it wasn't a cancellation
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process operations'
+        setProcessingError(errorMessage)
       }
+    } finally {
+      // Always clear progress when done
+      setBatchProgress(null)
+      // Reset cancelling flag
+      setIsCancelling(false)
     }
   }
 
@@ -346,6 +364,31 @@ export function VideoEditorModal({
     <>
       <Modal isOpen={isOpen} onClose={onClose} title="Edit Video">
         <div className={cn('w-full', className)}>
+          {/* Aspect Ratio Selector */}
+          <div className="mb-3">
+            <select
+              value={aspectRatio}
+              onChange={(e) => setAspectRatio(e.target.value as AspectRatioPreset)}
+              className={cn(
+                'text-sm px-3 py-2 rounded',
+                'bg-white dark:bg-gray-800',
+                'border-2 border-gray-300 dark:border-gray-600',
+                'text-gray-900 dark:text-white',
+                'hover:border-gray-400 dark:hover:border-gray-500',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500',
+                'transition-colors',
+                'cursor-pointer w-full'
+              )}
+              title="Select aspect ratio"
+            >
+              {(Object.keys(ASPECT_RATIOS) as AspectRatioPreset[]).map((key) => (
+                <option key={key} value={key}>
+                  {ASPECT_RATIOS[key].label} - {ASPECT_RATIOS[key].description}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Video Preview with Floating Controls and Overlays */}
           <div className="relative">
             <VideoPreview
@@ -353,7 +396,6 @@ export function VideoEditorModal({
               src={src}
               previewState={previewEnabled ? previewState : undefined}
               aspectRatio={aspectRatio}
-              onAspectRatioChange={setAspectRatio}
               onLoadedMetadata={handleMetadataLoad}
             />
 

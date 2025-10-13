@@ -109,7 +109,7 @@ export function ProcessingOverlay({
               <div className="w-full h-3 bg-black/30 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300 ease-out"
-                  style={{ width: `${progressPercent}%` }}
+                  style={{ width: progressPercent > 0 ? `${progressPercent}%` : '0%' }}
                 />
               </div>
             </div>
