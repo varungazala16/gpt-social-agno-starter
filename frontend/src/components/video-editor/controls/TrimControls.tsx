@@ -41,8 +41,6 @@ export function TrimControls({
     setTimeout(() => onTrim(), 100) // Small delay to batch rapid changes
   }
 
-  const isValid = startTime < endTime
-
   return (
     <div className={cn('space-y-3', className)}>
       <div>

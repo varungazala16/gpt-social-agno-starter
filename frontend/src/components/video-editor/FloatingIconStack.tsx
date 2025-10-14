@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Edit, Check, Loader2 } from 'lucide-react'
+import { Edit, Check, Loader2, Scissors, Crop, RotateCw, FlipHorizontal, Gauge, Volume2, Sparkles } from 'lucide-react'
 import type { QueuedOperation } from '@/lib/video-editor/core/queue-types'
 
 interface FloatingIconStackProps {
@@ -16,13 +16,13 @@ interface FloatingIconStackProps {
 // Map operation types to their icons
 const getOperationIcon = (type: string) => {
   const iconMap: Record<string, React.ElementType> = {
-    trim: require('lucide-react').Scissors,
-    crop: require('lucide-react').Crop,
-    rotate: require('lucide-react').RotateCw,
-    flip: require('lucide-react').FlipHorizontal,
-    speed: require('lucide-react').Gauge,
-    volume: require('lucide-react').Volume2,
-    filters: require('lucide-react').Sparkles,
+    trim: Scissors,
+    crop: Crop,
+    rotate: RotateCw,
+    flip: FlipHorizontal,
+    speed: Gauge,
+    volume: Volume2,
+    filters: Sparkles,
   }
   return iconMap[type] || Edit
 }

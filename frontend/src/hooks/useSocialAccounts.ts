@@ -10,7 +10,6 @@ import {
   type SocialAccountListResponse,
 } from '@/lib/api/social-accounts'
 import { APIError } from '@/lib/api/client'
-import { useRouter } from 'next/navigation'
 
 const QUERY_KEY = ['social-accounts']
 
@@ -29,8 +28,6 @@ export function useSocialAccounts() {
  * Hook to initiate OAuth connection for a platform
  */
 export function useConnectAccount() {
-  const router = useRouter()
-
   return useMutation<void, APIError, Platform>({
     mutationFn: async (platform: Platform) => {
       // Store platform in sessionStorage to handle callback

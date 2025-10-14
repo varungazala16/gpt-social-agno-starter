@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Play, Pause, Volume2, VolumeX, Maximize } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VideoControlsProps {
-  videoRef: React.RefObject<HTMLVideoElement>
+  videoRef: React.RefObject<HTMLVideoElement | null>
   trimStart?: number
   trimEnd?: number
   className?: string
@@ -18,7 +18,7 @@ export function VideoControls({ videoRef, trimStart, trimEnd, className }: Video
   const [volume, setVolume] = useState(1)
   const [isMuted, setIsMuted] = useState(false)
   const [showControls, setShowControls] = useState(true)
-  const hideControlsTimeout = useRef<NodeJS.Timeout>()
+  const hideControlsTimeout = useRef<NodeJS.Timeout | undefined>(undefined)
 
   // Update playback state
   useEffect(() => {
@@ -56,7 +56,7 @@ export function VideoControls({ videoRef, trimStart, trimEnd, className }: Video
   }, [videoRef])
 
   // Auto-hide controls
-  const resetHideTimer = () => {
+  const resetHideTimer = useCallback(() => {
     setShowControls(true)
     if (hideControlsTimeout.current) {
       clearTimeout(hideControlsTimeout.current)
@@ -66,7 +66,7 @@ export function VideoControls({ videoRef, trimStart, trimEnd, className }: Video
         setShowControls(false)
       }
     }, 3000)
-  }
+  }, [isPlaying])
 
   useEffect(() => {
     resetHideTimer()
@@ -75,7 +75,7 @@ export function VideoControls({ videoRef, trimStart, trimEnd, className }: Video
         clearTimeout(hideControlsTimeout.current)
       }
     }
-  }, [isPlaying])
+  }, [isPlaying, resetHideTimer])
 
   const togglePlayPause = () => {
     const video = videoRef.current

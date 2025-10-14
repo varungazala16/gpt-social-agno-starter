@@ -384,7 +384,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Post Reminders</p>
-                <p className="text-xs text-gray-400">Get notified when it's time to record or post</p>
+                <p className="text-xs text-gray-400">Get notified when it&apos;s time to record or post</p>
               </div>
               <button
                 onClick={() => setNotifications(prev => ({ ...prev, postReminders: !prev.postReminders }))}

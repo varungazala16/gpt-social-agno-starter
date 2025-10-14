@@ -3,7 +3,6 @@
 import { forwardRef, useMemo, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { VideoControls } from './VideoControls'
-import { Monitor } from 'lucide-react'
 import type { PreviewState } from '@/lib/video-editor/core/queue-types'
 
 export type AspectRatioPreset = '16:9' | '9:16' | '1:1' | '4:5' | '4:3'

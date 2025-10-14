@@ -10,7 +10,7 @@ export interface SocialAccount {
   platform_username: string
   scopes: string[]
   token_expires_at: string | null
-  platform_metadata: Record<string, any>
+  platform_metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }

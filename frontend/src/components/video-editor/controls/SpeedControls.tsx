@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Gauge } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface SpeedControlsProps {

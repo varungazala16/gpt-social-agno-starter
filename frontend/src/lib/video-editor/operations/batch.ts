@@ -12,7 +12,7 @@ import {
   applyFilters
 } from '../operations'
 import type { FFmpeg } from '@ffmpeg/ffmpeg'
-import type { QueuedOperation, BatchProcessingOptions } from '../core/queue-types'
+import type { QueuedOperation } from '../core/queue-types'
 import type { ProcessingResult, VideoMetadata, AspectRatio } from '../core/types'
 
 export interface BatchProgressCallback {

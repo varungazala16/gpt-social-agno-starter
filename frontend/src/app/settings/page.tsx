@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { OAuthCallbackHandler } from '@/components/OAuthCallbackHandler'
 import {
   User,
   Link2,
@@ -17,12 +18,11 @@ import {
   Loader2
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useSocialAccounts, useConnectAccount, useDisconnectAccount, useRefetchAccounts } from '@/hooks/useSocialAccounts'
+import { useSocialAccounts, useConnectAccount, useDisconnectAccount } from '@/hooks/useSocialAccounts'
 import type { Platform } from '@/lib/api/social-accounts'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { user } = useAuth()
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '')
   const [emailAddress] = useState(user?.email || '')
@@ -32,7 +32,6 @@ export default function SettingsPage() {
   const { data: accountsData, isLoading: isLoadingAccounts, error: accountsError } = useSocialAccounts()
   const connectAccount = useConnectAccount()
   const disconnectAccount = useDisconnectAccount()
-  const refetchAccounts = useRefetchAccounts()
 
   // Notifications state
   const [notifications, setNotifications] = useState({
@@ -40,24 +39,6 @@ export default function SettingsPage() {
     analyticsUpdates: true,
     tipsAndBestPractices: false
   })
-
-  // Handle OAuth callback success
-  useEffect(() => {
-    const code = searchParams.get('code')
-    const state = searchParams.get('state')
-    const platform = sessionStorage.getItem('connecting_platform')
-
-    if (code && state && platform) {
-      // OAuth callback was successful, refetch accounts
-      refetchAccounts()
-
-      // Clean up
-      sessionStorage.removeItem('connecting_platform')
-
-      // Remove query params from URL
-      router.replace('/settings')
-    }
-  }, [searchParams, refetchAccounts, router])
 
   const handleSaveProfile = async () => {
     // TODO: Implement profile update
@@ -101,6 +82,11 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-950">
+      {/* OAuth callback handler */}
+      <Suspense fallback={null}>
+        <OAuthCallbackHandler />
+      </Suspense>
+
       {/* Header */}
       <div className="sticky top-0 z-10 bg-gray-950 border-b border-gray-800">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -466,7 +452,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-white">Post Reminders</p>
-                  <p className="text-xs text-gray-400">Get notified when it's time to record or post</p>
+                  <p className="text-xs text-gray-400">Get notified when it&apos;s time to record or post</p>
                 </div>
                 <button
                   onClick={() => setNotifications(prev => ({ ...prev, postReminders: !prev.postReminders }))}

@@ -52,7 +52,8 @@ export function useQueueMode() {
   const previewState = useMemo<PreviewState | undefined>(() => {
     if (!previewEnabled) return undefined
     return queueManager.calculatePreviewState()
-  }, [queueManager, operations, previewEnabled])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queueManager, previewEnabled, operations])
 
   // Toggle preview
   const togglePreview = useCallback(() => {

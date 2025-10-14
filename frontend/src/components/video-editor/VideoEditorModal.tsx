@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Loader2, AlertCircle, Check } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Modal } from '../Modal'
 import { AlertDialog } from '../AlertDialog'
@@ -26,6 +26,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import type { AspectRatio } from '@/lib/video-editor'
 import { processBatch } from '@/lib/video-editor/operations/batch'
 import { FFmpegManager } from '@/lib/video-editor/core/ffmpeg-manager'
+import type { ProcessingResult } from '@/lib/video-editor/core/types'
 
 interface VideoEditorModalProps {
   src: string
@@ -45,7 +46,7 @@ export function VideoEditorModal({
   className
 }: VideoEditorModalProps) {
   const queryClient = useQueryClient()
-  const [isSaving, setIsSaving] = useState(false)
+  const [, setIsSaving] = useState(false)
   const [showEffectSelection, setShowEffectSelection] = useState(false)
   const [activeEffect, setActiveEffect] = useState<EffectType | null>(null)
   const [aspectRatio, setAspectRatio] = useState<AspectRatioPreset>('9:16')
@@ -67,7 +68,7 @@ export function VideoEditorModal({
 
   // Batch processing state
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; operation: string; subProgress?: number } | null>(null)
-  const [batchResult, setBatchResult] = useState<{ blob: Blob; format: 'mp4' | 'webm' } | null>(null)
+  const [, setBatchResult] = useState<{ blob: Blob; format: 'mp4' | 'webm' } | null>(null)
   const [processingError, setProcessingError] = useState<string | null>(null)
   const [isCancelling, setIsCancelling] = useState(false)
 
@@ -75,15 +76,11 @@ export function VideoEditorModal({
   const {
     operations,
     addOperation,
-    getOperation,
     removeOperation,
     clearQueue,
     previewState,
     previewEnabled
   } = useQueueMode()
-
-  // Helper to check if an operation type is queued
-  const hasQueued = (type: string) => !!getOperation(type)
 
   // Helper to create remove handlers
   const createRemoveHandler = (type: string) => () => {
@@ -105,10 +102,7 @@ export function VideoEditorModal({
     onVideoMetadataLoaded: handleVideoMetadataLoaded,
     ffmpegLoaded,
     ffmpegLoading,
-    ffmpegProgress,
-    isProcessing,
-    processingOperation,
-    result
+    isProcessing
   } = useVideoEditor({
     videoSrc: src,
     autoLoadFFmpeg: isOpen,
@@ -351,10 +345,6 @@ export function VideoEditorModal({
       // Reset cancelling flag
       setIsCancelling(false)
     }
-  }
-
-  const getProgressPercentage = () => {
-    return Math.round((ffmpegProgress?.progress || 0) * 100)
   }
 
   // Get list of applied effect types for filtering in selection overlay

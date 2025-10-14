@@ -6,7 +6,7 @@ export class APIError extends Error {
   constructor(
     message: string,
     public status: number,
-    public detail?: any
+    public detail?: unknown
   ) {
     super(message)
     this.name = 'APIError'
@@ -94,7 +94,7 @@ export async function apiGet<T>(endpoint: string): Promise<T> {
 /**
  * API client for POST requests
  */
-export async function apiPost<T>(endpoint: string, data?: any): Promise<T> {
+export async function apiPost<T>(endpoint: string, data?: unknown): Promise<T> {
   return apiClient<T>(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
@@ -104,7 +104,7 @@ export async function apiPost<T>(endpoint: string, data?: any): Promise<T> {
 /**
  * API client for PUT requests
  */
-export async function apiPut<T>(endpoint: string, data?: any): Promise<T> {
+export async function apiPut<T>(endpoint: string, data?: unknown): Promise<T> {
   return apiClient<T>(endpoint, {
     method: 'PUT',
     body: data ? JSON.stringify(data) : undefined,

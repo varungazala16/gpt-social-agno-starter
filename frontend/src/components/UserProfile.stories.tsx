@@ -54,7 +54,7 @@ export const AdminUser: Story = {
     },
   },
   decorators: [
-    (Story) => {
+    () => {
       // In a real implementation, you would mock the Supabase response to return an admin user
       return (
         <div className="w-full min-h-[100px] p-4 bg-gray-50 dark:bg-gray-900">
@@ -161,7 +161,7 @@ export const LongEmail: Story = {
     },
   },
   decorators: [
-    (Story) => (
+    () => (
       <div className="w-full min-h-[100px] p-4 bg-gray-50 dark:bg-gray-900">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">

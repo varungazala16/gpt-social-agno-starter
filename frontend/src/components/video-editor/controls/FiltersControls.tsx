@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { FilterOptions } from '@/lib/video-editor'
 
@@ -20,8 +19,6 @@ export function FiltersControls({
   const [contrast, setContrast] = useState(0)
   const [saturation, setSaturation] = useState(1)
   const [blur, setBlur] = useState(0)
-
-  const hasChanges = brightness !== 0 || contrast !== 0 || saturation !== 1 || blur !== 0
 
   const applyFilters = (b: number, c: number, s: number, bl: number) => {
     // Always notify parent of filter changes (parent handles removal when all are default)
@@ -46,13 +43,6 @@ export function FiltersControls({
   const handleBlurChange = (value: number) => {
     setBlur(value)
     applyFilters(brightness, contrast, saturation, value)
-  }
-
-  const handleReset = () => {
-    setBrightness(0)
-    setContrast(0)
-    setSaturation(1)
-    setBlur(0)
   }
 
   return (

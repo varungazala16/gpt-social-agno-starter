@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Volume2, VolumeX } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface VolumeControlsProps {

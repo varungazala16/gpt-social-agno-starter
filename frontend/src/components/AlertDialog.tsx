@@ -10,7 +10,7 @@ interface AlertDialogProps {
   variant?: 'info' | 'error' | 'success'
 }
 
-export function AlertDialog({ isOpen, onClose, title = 'Alert', message, variant = 'info' }: AlertDialogProps) {
+export function AlertDialog({ isOpen, onClose, title = 'Alert', message }: AlertDialogProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-md">
       <div className="p-4">

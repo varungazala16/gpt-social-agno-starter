@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { VideoGallery } from './VideoGallery'
-import { useState } from 'react'
 
 const meta: Meta<typeof VideoGallery> = {
   title: 'Components/VideoGallery',

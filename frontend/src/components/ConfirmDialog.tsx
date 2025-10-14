@@ -13,15 +13,14 @@ interface ConfirmDialogProps {
   variant?: 'danger' | 'warning' | 'info'
 }
 
-export function ConfirmDialog({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  title = 'Confirm', 
-  message, 
+export function ConfirmDialog({
+  isOpen,
+  onClose,
+  onConfirm,
+  title = 'Confirm',
+  message,
   confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  variant = 'warning'
+  cancelText = 'Cancel'
 }: ConfirmDialogProps) {
   const handleConfirm = () => {
     onConfirm()

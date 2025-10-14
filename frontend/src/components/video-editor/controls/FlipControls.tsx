@@ -33,8 +33,6 @@ export function FlipControls({
     setTimeout(() => onFlip({ horizontal: flipH, vertical: newFlipV }), 100)
   }
 
-  const canApply = flipH || flipV
-
   return (
     <div className={cn('space-y-3', className)}>
       <div className="grid grid-cols-2 gap-2">
