@@ -50,7 +50,6 @@ function setupEventListeners() {
     document.getElementById('getInstagramVideosBtn').addEventListener('click', getInstagramVideos);
 
     // AI Script Generator
-    document.getElementById('scriptForm').addEventListener('submit', generateScriptComplete);
     document.getElementById('streamScriptBtn').addEventListener('click', generateScriptStream);
 }
 
@@ -573,54 +572,6 @@ async function getInstagramVideos() {
 
 // ===== AI Script Generator =====
 
-async function generateScriptComplete(e) {
-    e.preventDefault();
-
-    const prompt = document.getElementById('scriptPrompt').value;
-    const platform = document.getElementById('scriptPlatform').value;
-    const duration = document.getElementById('scriptDuration').value;
-    const tone = document.getElementById('scriptTone').value;
-
-    const payload = {
-        prompt,
-        platform,
-        tone
-    };
-
-    if (duration) {
-        payload.duration = parseInt(duration);
-    }
-
-    try {
-        showResponse('scriptResponse', { message: '⏳ Generating script...' });
-
-        const response = await fetch(`${API_BASE_URL}/agent/script`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${currentToken}`
-            },
-            body: JSON.stringify(payload)
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.detail || 'Failed to generate script');
-        }
-
-        showResponse('scriptResponse', {
-            message: '✅ Script Generated!',
-            platform: data.platform,
-            tone: data.tone,
-            script: data.script
-        });
-
-    } catch (error) {
-        showResponse('scriptResponse', { error: error.message }, true);
-    }
-}
-
 async function generateScriptStream(e) {
     e.preventDefault();
 
@@ -651,7 +602,8 @@ async function generateScriptStream(e) {
         const response = await fetch(`${API_BASE_URL}/agent/script/stream`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${currentToken}`
             },
             body: JSON.stringify(payload)
         });

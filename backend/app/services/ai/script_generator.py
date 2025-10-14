@@ -1,6 +1,7 @@
 """Video script generation agent using Agno AI"""
 
-from collections.abc import Iterator
+import asyncio
+from collections.abc import AsyncIterator
 
 from agno.agent import Agent, RunOutput, RunOutputEvent
 from agno.models.anthropic import Claude
@@ -53,17 +54,33 @@ class ScriptGeneratorAgent:
 
         return "\n".join(prompt_parts)
 
-    async def generate_script(
+    async def stream_script_async(
         self, prompt: str, platform: str, duration: int | None = None, tone: str = "casual"
-    ) -> RunOutput:
-        """Generate a complete script (non-streaming)"""
-        full_prompt = self._build_prompt(prompt, platform, duration, tone)
-        return self.agent.run(full_prompt)
-
-    def stream_script(
-        self, prompt: str, platform: str, duration: int | None = None, tone: str = "casual"
-    ) -> Iterator[RunOutputEvent | RunOutput]:
-        """Stream script generation chunk by chunk"""
+    ) -> AsyncIterator[RunOutputEvent | RunOutput]:
+        """Stream script generation chunk by chunk (asynchronous)"""
         full_prompt = self._build_prompt(prompt, platform, duration, tone)
 
-        return self.agent.run(full_prompt, stream=True, stream_intermediate_steps=True)
+        # Get the synchronous iterator
+        sync_stream = self.agent.run(full_prompt, stream=True, stream_intermediate_steps=True)
+
+        # Convert to async iterator
+        loop = asyncio.get_event_loop()
+        sync_iter = iter(sync_stream)
+
+        while True:
+            # Run next() in executor to avoid blocking
+            def get_next() -> RunOutputEvent | RunOutput | None:
+                try:
+                    return next(sync_iter)
+                except StopIteration:
+                    return None
+
+            chunk = await loop.run_in_executor(None, get_next)
+
+            if chunk is None:
+                break
+
+            yield chunk
+
+            # # Yield control to event loop
+            # await asyncio.sleep(0)

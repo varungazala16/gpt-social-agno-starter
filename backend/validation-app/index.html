@@ -276,7 +276,7 @@
             <h2>🤖 AI Script Generator</h2>
             <p style="color: #666; margin-bottom: 20px;">Generate video scripts using Agno AI agent</p>
 
-            <form id="scriptForm">
+            <div id="scriptForm">
                 <div class="form-group">
                     <label for="scriptPrompt">Video Concept / Idea</label>
                     <input type="text" id="scriptPrompt" required placeholder="e.g., A day in the life of a software engineer" value="Tips for productivity while working from home">
@@ -302,11 +302,8 @@
                         <option value="inspirational">Inspirational</option>
                     </select>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                    <button type="submit" style="background: #10b981;">Generate Script (Complete)</button>
-                    <button type="button" id="streamScriptBtn" style="background: #8b5cf6;">Stream Script</button>
-                </div>
-            </form>
+                <button type="button" id="streamScriptBtn" style="background: #8b5cf6;">Stream Script</button>
+            </div>
 
             <div id="scriptResponse" class="response"></div>
         </div>
