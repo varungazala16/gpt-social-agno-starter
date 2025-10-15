@@ -96,68 +96,115 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
   }, [isRecording])
 
   return (
-    <div className={cn('w-full', className)}>
-      <div className="relative bg-black overflow-hidden aspect-video">
+    <div className={cn('w-full space-y-6', className)}>
+      {/* Video Preview Area */}
+      <div className="relative bg-black dark:bg-gray-950 overflow-hidden aspect-video rounded-xl border-2 border-gray-200 dark:border-gray-700 shadow-lg">
         <video
           ref={videoRef}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover rounded-lg"
           muted
           playsInline
         />
         
         {!stream && !isRecording && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-            <div className="text-center">
-              <Video className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4" />
-              <p className="text-sm sm:text-base">Camera preview will appear here</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-900 dark:bg-gray-950">
+            <div className="text-center p-8">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center">
+                <Video className="w-10 h-10 text-red-500" />
+              </div>
+              <p className="text-lg font-medium text-white mb-2">Camera Preview</p>
+              <p className="text-sm text-gray-400">Your camera feed will appear here when you start recording</p>
             </div>
           </div>
         )}
 
         {isRecording && (
-          <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex items-center gap-2 bg-red-600 px-3 py-1.5">
-            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-white animate-pulse" />
-            <span className="text-xs sm:text-sm">Recording</span>
+          <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600 px-4 py-2 rounded-full shadow-lg">
+            <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+            <span className="text-sm font-medium text-white">REC</span>
+          </div>
+        )}
+
+        {saveMutation.isPending && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm">
+            <div className="text-center p-6 bg-white dark:bg-gray-900 rounded-xl shadow-xl">
+              <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+              <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">Processing Video</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Saving your recording...</p>
+            </div>
           </div>
         )}
       </div>
 
-      <div className="flex gap-3 sm:gap-4 mt-4">
-        {!isRecording ? (
-          <button
-            onClick={startRecording}
-            disabled={saveMutation.isPending}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-600',
-              saveMutation.isPending && 'opacity-50 cursor-not-allowed'
-            )}
-          >
-            {saveMutation.isPending ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                <span className="text-sm sm:text-base">Saving...</span>
-              </>
-            ) : (
-              <>
-                <Video className="w-5 h-5" />
-                <span className="text-sm sm:text-base">Start Recording</span>
-              </>
-            )}
-          </button>
-        ) : (
-          <button
-            onClick={stopRecording}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-800"
-          >
-            <Square className="w-5 h-5" />
-            <span className="text-sm sm:text-base">Stop Recording</span>
-          </button>
-        )}
+      {/* Control Section */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-lg">
+        <div className="flex flex-col items-center space-y-4">
+          {!isRecording ? (
+            <>
+              <div className="text-center mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Ready to Record</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Click the button below to start recording your video
+                </p>
+              </div>
+              <button
+                onClick={startRecording}
+                disabled={saveMutation.isPending}
+                className={cn(
+                  'flex items-center justify-center gap-3 px-8 py-4 rounded-xl',
+                  'bg-red-600 hover:bg-red-700 text-white font-medium',
+                  'transition-all duration-200 ease-in-out transform hover:scale-105',
+                  'shadow-lg hover:shadow-xl',
+                  'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
+                )}
+              >
+                <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+                  <Video className="w-4 h-4" />
+                </div>
+                <span className="text-lg">Start Recording</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="text-center mb-2">
+                <h3 className="text-lg font-semibold text-red-600 mb-2">Recording in Progress</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Click stop when you're finished recording
+                </p>
+              </div>
+              <button
+                onClick={stopRecording}
+                className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl"
+              >
+                <div className="w-6 h-6 rounded bg-white/20 flex items-center justify-center">
+                  <Square className="w-4 h-4" />
+                </div>
+                <span className="text-lg">Stop Recording</span>
+              </button>
+            </>
+          )}
+          
+          {/* Permission hint */}
+          {!stream && !isRecording && !error && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="w-2 h-2 bg-blue-500 rounded-full" />
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                Camera and microphone access required
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {error && (
-        <div className="mt-3 p-3 bg-red-50">
-          <p className="text-sm">{error}</p>
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <div className="flex items-start gap-3">
+            <div className="w-5 h-5 rounded-full bg-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-red-600 dark:text-red-400 mb-1">Recording Error</p>
+              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            </div>
+          </div>
         </div>
       )}
     </div>

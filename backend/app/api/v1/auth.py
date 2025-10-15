@@ -3,8 +3,6 @@ from fastapi import APIRouter, HTTPException, status
 from app.core.auth import SupabaseClient, User
 from app.schemas.user import (
     LoginResponse,
-    SignupResponse,
-    UserCreate,
     UserLogin,
     UserResponse,
 )
@@ -12,26 +10,7 @@ from app.schemas.user import (
 router = APIRouter()
 
 
-@router.post("/signup", status_code=status.HTTP_201_CREATED, response_model=SignupResponse)
-async def signup(user_data: UserCreate, supabase_client: SupabaseClient) -> SignupResponse:
-    """Create a new user account"""
-    try:
-        result = await supabase_client.auth.sign_up(
-            {"email": user_data.email, "password": user_data.password, "options": {"data": {"name": user_data.name}}}
-        )
-
-        if not result.user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create user")
-
-        return SignupResponse(
-            user=UserResponse(id=result.user.id, email=result.user.email),
-            session={
-                "access_token": result.session.access_token if result.session else None,
-                "refresh_token": result.session.refresh_token if result.session else None,
-            },
-        )
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Signup failed: {str(e)}") from e
+# Custom signup endpoint deprecated - users should sign up via Supabase social login (Google)
 
 
 @router.post("/login", response_model=LoginResponse)

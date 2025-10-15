@@ -1,6 +1,14 @@
 import { createClient } from '@/lib/supabase/client'
+import { HttpStatus } from '@/lib/http-status'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api/v1'
+
+// Global error handler for payment required errors
+let globalPaymentModalHandler: ((error: APIError) => void) | null = null
+
+export function setGlobalPaymentModalHandler(handler: (error: APIError) => void) {
+  globalPaymentModalHandler = handler
+}
 
 export class APIError extends Error {
   constructor(
@@ -58,11 +66,18 @@ export async function apiClient<T>(
         errorDetail = await response.text()
       }
 
-      throw new APIError(
+      const apiError = new APIError(
         errorDetail?.detail || errorDetail?.message || `Request failed with status ${response.status}`,
         response.status,
         errorDetail
       )
+
+      // Automatically trigger payment modal for 402 errors
+      if (response.status === HttpStatus.PAYMENT_REQUIRED && globalPaymentModalHandler) {
+        globalPaymentModalHandler(apiError)
+      }
+
+      throw apiError
     }
 
     // Handle 204 No Content

@@ -1,21 +1,18 @@
 import logging
+from functools import wraps
 from http import HTTPStatus
-from typing import Annotated, Any, Protocol, cast
+from typing import Annotated, Any, Callable, cast
 
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 from supabase import AsyncClientOptions
 from supabase._async.client import AsyncClient, create_client
 
 from app.core.config import settings
-
-
-class UserProtocol(Protocol):
-    """Protocol for user objects from Supabase"""
-
-    id: str
-    email: str | None
-    user_metadata: dict[str, Any]
+from app.core.types import SupabaseClient as SupabaseClientType
+from app.core.types import UserProtocol
+from app.services.credits import CreditsService, InsufficientCreditsError
 
 
 async def get_supabase_client() -> AsyncClient:
@@ -30,7 +27,7 @@ async def get_supabase_client() -> AsyncClient:
     return supabase_client
 
 
-SupabaseClient = Annotated[AsyncClient, Depends(get_supabase_client)]
+SupabaseClient = Annotated[AsyncClient, Depends(get_supabase_client)]  # Real implementation
 
 
 # auto get token from header
@@ -49,6 +46,7 @@ async def get_current_user(token: TokenDep, supabase_client: SupabaseClient) -> 
         logging.info(
             {"message": "User authenticated successfully", "user_id": user_rsp.user.id, "email": user_rsp.user.email}
         )
+        
         return cast(UserProtocol, user_rsp.user)
     except HTTPException:
         raise
@@ -58,3 +56,70 @@ async def get_current_user(token: TokenDep, supabase_client: SupabaseClient) -> 
 
 
 User = Annotated[UserProtocol, Depends(get_current_user)]
+
+
+def require_credits(cost: int):
+    """
+    Decorator to check and deduct credits for API operations.
+    
+    Args:
+        cost: Number of credits required for the operation
+        
+    Usage:
+        @app.post("/generate")
+        @require_credits(cost=3)
+        async def generate_content(
+            current_user: User,
+            db: Annotated[AsyncSession, Depends(get_db)],
+            supabase_client: SupabaseClient,
+            # ... other params
+        ):
+            # Operation logic here
+            return {"message": "Generation complete"}
+    """
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        @wraps(func)
+        async def wrapper(*args, **kwargs) -> Any:
+            
+            # Extract dependencies from kwargs
+            current_user = kwargs.get('current_user')
+            db = kwargs.get('db') 
+            supabase_client = kwargs.get('supabase_client')
+            
+            # Validate required dependencies are present
+            if not current_user:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="User authentication dependency missing"
+                )
+            if not db:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Database dependency missing"
+                )
+            if not supabase_client:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Supabase client dependency missing"
+                )
+            
+            credits_service = CreditsService(db, supabase_client)
+            
+            try:
+                # Check and deduct credits
+                await credits_service.deduct_credits(
+                    user_id=current_user.id,
+                    amount=cost,
+                    description=f"API operation: {func.__name__}"
+                )
+                
+                return await func(*args, **kwargs)
+                
+            except InsufficientCreditsError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                    detail=f"Not enough credits. Required: {e.required}, Available: {e.available}"
+                ) from e
+            
+        return wrapper
+    return decorator

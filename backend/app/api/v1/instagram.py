@@ -2,12 +2,14 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select, update
 
 from app.core.auth import User
+from app.core.config import settings
 from app.core.database import Database
 from app.models.social_account import Platform, SocialAccount
-from app.schemas.social_account import OAuthAuthorizeResponse, OAuthCallbackResponse, SocialAccountResponse
+from app.schemas.social_account import OAuthAuthorizeResponse, SocialAccountResponse
 from app.services.api.instagram import InstagramAPIClient
 from app.services.oauth.instagram import InstagramOAuth
 
@@ -28,20 +30,24 @@ async def instagram_authorize(current_user: User) -> OAuthAuthorizeResponse:
     return OAuthAuthorizeResponse(authorization_url=authorization_url, state=state)
 
 
-@router.get("/oauth2/callback")
+@router.get("/oauth2/callback", response_class=RedirectResponse)
 async def instagram_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from Instagram"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-) -> OAuthCallbackResponse:
+):
     """Handle Instagram OAuth callback (public endpoint)"""
 
     # Extract user_id from state
     # TODO: Verify state parameter against stored value in Redis for CSRF protection
     try:
         user_id = UUID(state)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state parameter") from e
+    except ValueError:
+        # Redirect to settings with error parameter
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?error=invalid_state",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     oauth = InstagramOAuth()
 
@@ -84,22 +90,24 @@ async def instagram_callback(
             )
             await db.commit()
             await db.refresh(existing_account)
-            account = existing_account
         else:
             # Create new account
             account = SocialAccount(user_id=user_id, **social_account_data.model_dump())
             db.add(account)
             await db.commit()
-            await db.refresh(account)
 
-        return OAuthCallbackResponse(
-            success=True,
-            message="Instagram account connected successfully",
-            account=SocialAccountResponse.model_validate(account),
+        # Redirect back to settings page with success
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?connected=instagram",
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Instagram OAuth failed: {str(e)}") from e
+        # Redirect to settings with error parameter
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?error=instagram_failed&message={str(e)}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
 
 @router.get("/account", response_model=SocialAccountResponse)

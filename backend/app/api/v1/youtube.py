@@ -2,12 +2,14 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select, update
 
 from app.core.auth import User
+from app.core.config import settings
 from app.core.database import Database
 from app.models.social_account import Platform, SocialAccount
-from app.schemas.social_account import OAuthAuthorizeResponse, OAuthCallbackResponse, SocialAccountResponse
+from app.schemas.social_account import OAuthAuthorizeResponse, SocialAccountResponse
 from app.services.api.youtube import YouTubeAPIClient
 from app.services.oauth.youtube import YouTubeOAuth
 
@@ -28,20 +30,24 @@ async def youtube_authorize(current_user: User) -> OAuthAuthorizeResponse:
     return OAuthAuthorizeResponse(authorization_url=authorization_url, state=state)
 
 
-@router.get("/oauth2/callback", response_model=OAuthCallbackResponse)
+@router.get("/oauth2/callback", response_class=RedirectResponse)
 async def youtube_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from YouTube"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-) -> OAuthCallbackResponse:
+):
     """Handle YouTube OAuth callback (public endpoint)"""
 
     # Extract user_id from state
     # TODO: Verify state parameter against stored value in Redis for CSRF protection
     try:
         user_id = UUID(state)
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid state parameter") from e
+    except ValueError:
+        # Redirect to settings with error parameter
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?error=invalid_state",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
     oauth = YouTubeOAuth()
 
@@ -79,22 +85,24 @@ async def youtube_callback(
             )
             await db.commit()
             await db.refresh(existing_account)
-            account = existing_account
         else:
             # Create new account
             account = SocialAccount(user_id=user_id, **social_account_data.model_dump())
             db.add(account)
             await db.commit()
-            await db.refresh(account)
 
-        return OAuthCallbackResponse(
-            success=True,
-            message="YouTube account connected successfully",
-            account=SocialAccountResponse.model_validate(account),
+        # Redirect back to settings page with success
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?connected=youtube",
+            status_code=status.HTTP_303_SEE_OTHER,
         )
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"YouTube OAuth failed: {str(e)}") from e
+        # Redirect to settings with error parameter
+        return RedirectResponse(
+            url=f"{settings.FRONTEND_URL}/settings?error=youtube_failed&message={str(e)}",
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
 
 
 @router.get("/account", response_model=SocialAccountResponse)
