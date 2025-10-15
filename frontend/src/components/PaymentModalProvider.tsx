@@ -38,7 +38,7 @@ export function PaymentModalProvider({ children }: PaymentModalProviderProps) {
         })
       } else {
         setErrorDetails({
-          creditsAvailable: balance
+          creditsAvailable: balance ?? undefined
         })
       }
       setIsOpen(true)

@@ -169,7 +169,7 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
               <div className="text-center mb-2">
                 <h3 className="text-lg font-semibold text-red-600 mb-2">Recording in Progress</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Click stop when you're finished recording
+                  Click stop when you&apos;re finished recording
                 </p>
               </div>
               <button

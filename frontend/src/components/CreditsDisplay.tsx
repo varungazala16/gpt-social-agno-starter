@@ -3,7 +3,6 @@
 import { Coins } from 'lucide-react'
 import { useCredits } from '@/hooks/useCredits'
 import { Skeleton } from '@/components/ui/skeleton'
-import { HttpStatus } from '@/lib/http-status'
 import { cn } from '@/lib/utils'
 
 interface CreditsDisplayProps {
@@ -11,14 +10,14 @@ interface CreditsDisplayProps {
 }
 
 export function CreditsDisplay({ className }: CreditsDisplayProps) {
-  const { 
-    balance, 
-    isLoading, 
+  const {
+    balance,
+    isLoading,
     error
   } = useCredits()
 
   // Don't render if there's an authentication error
-  if (error?.status === HttpStatus.UNAUTHORIZED) {
+  if (error?.message?.includes('Not authenticated')) {
     return null
   }
 
