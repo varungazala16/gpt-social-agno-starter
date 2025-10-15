@@ -1,7 +1,9 @@
 import logging
 from typing import Optional
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import cast, select
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -29,7 +31,7 @@ class CreditsService:
     async def get_user_balance(self, user_id: str) -> int:
         """Get current credit balance for a user."""
         result = await self.db.execute(
-            select(UserCredit.balance).where(UserCredit.user_id == user_id)
+            select(UserCredit.balance).where(UserCredit.user_id == cast(user_id, PG_UUID))
         )
         balance = result.scalar_one_or_none()
         return balance if balance is not None else 0
@@ -37,7 +39,7 @@ class CreditsService:
     async def get_or_create_user_credit(self, user_id: str) -> UserCredit:
         """Get existing user credit record or create one with default balance."""
         result = await self.db.execute(
-            select(UserCredit).where(UserCredit.user_id == user_id)
+            select(UserCredit).where(UserCredit.user_id == cast(user_id, PG_UUID))
         )
         user_credit = result.scalar_one_or_none()
         
@@ -156,15 +158,15 @@ class CreditsService:
         return old_balance, new_balance
     
     async def get_user_transactions(
-        self, 
-        user_id: str, 
-        limit: int = 50, 
+        self,
+        user_id: str,
+        limit: int = 50,
         offset: int = 0
     ) -> list[CreditTransaction]:
         """Get user's credit transaction history."""
         result = await self.db.execute(
             select(CreditTransaction)
-            .where(CreditTransaction.user_id == user_id)
+            .where(CreditTransaction.user_id == cast(user_id, PG_UUID))
             .order_by(CreditTransaction.created_at.desc())
             .limit(limit)
             .offset(offset)
