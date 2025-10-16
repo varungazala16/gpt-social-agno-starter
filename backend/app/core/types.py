@@ -15,7 +15,7 @@ class UserProtocol(Protocol):
 
 # Forward declaration for SupabaseClient type
 # The actual dependency function lives in auth.py
-def _get_supabase_client_stub():
+def _get_supabase_client_stub() -> None:
     """Stub function for type annotation only. Real implementation in auth.py"""
     raise NotImplementedError("This is a stub for type annotation")
 

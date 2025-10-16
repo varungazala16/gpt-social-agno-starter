@@ -35,7 +35,7 @@ async def youtube_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from YouTube"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-):
+) -> RedirectResponse:
     """Handle YouTube OAuth callback (public endpoint)"""
 
     # Extract user_id from state

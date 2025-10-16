@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class NotificationService:
     """Service for managing user notifications."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.email_client = SendgridClient()
 
     async def send_welcome_email(

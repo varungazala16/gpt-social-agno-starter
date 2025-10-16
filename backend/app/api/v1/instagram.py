@@ -35,7 +35,7 @@ async def instagram_callback(
     db: Database,
     code: str = Query(..., description="Authorization code from Instagram"),
     state: str = Query(..., description="State parameter for CSRF protection"),
-):
+) -> RedirectResponse:
     """Handle Instagram OAuth callback (public endpoint)"""
 
     # Extract user_id from state

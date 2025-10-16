@@ -2,8 +2,8 @@ import asyncio
 import logging
 from typing import Any
 
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid import SendGridAPIClient  # type: ignore[import-not-found]
+from sendgrid.helpers.mail import Mail  # type: ignore[import-not-found]
 
 from app.core.config import settings
 from app.utils.notifications.templates import WELCOME_EMAIL_TEMPLATE, WelcomeEmailData
@@ -66,8 +66,7 @@ class SendgridClient:
                 return True
             else:
                 logger.error(
-                    f"Failed to send email to {to_email}. "
-                    f"Status: {response.status_code}, Body: {response.body}"
+                    f"Failed to send email to {to_email}. " f"Status: {response.status_code}, Body: {response.body}"
                 )
                 return False
 
@@ -104,7 +103,7 @@ class SendgridClient:
             for recipient in recipients
         ]
         results = await asyncio.gather(*tasks)
-        return dict(zip(recipients, results))
+        return dict(zip(recipients, results, strict=False))
 
     async def send_welcome_email(
         self,
@@ -126,6 +125,6 @@ class SendgridClient:
         return await self.send_template_email(
             to_email=to_email,
             template_id=WELCOME_EMAIL_TEMPLATE,
-            dynamic_template_data=data,
+            dynamic_template_data=dict(data),
             from_email=from_email,
         )

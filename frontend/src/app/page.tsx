@@ -8,10 +8,20 @@ import { CreditsDisplay } from '@/components/CreditsDisplay'
 import { useCreatePost } from '@/hooks/useCreatePost'
 import { Button } from '@/components/preline/Button'
 import { Separator } from '@/components/ui/separator'
+import { useCopilotReadable } from '@copilotkit/react-core'
 
 export default function Home() {
   const router = useRouter()
   const createPostMutation = useCreatePost()
+
+  // Make page context readable to the AI agent
+  useCopilotReadable({
+    description: "Current page state and post studio context",
+    value: JSON.stringify({
+      pageType: "post-studio",
+      features: ["gallery", "create-post", "edit-post"]
+    })
+  })
 
   const handleNewPost = async () => {
     try {
@@ -29,7 +39,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950">
-      {/* Sidebar - Now visible on all screen sizes */}
+      {/* Navigation Sidebar */}
       <aside className="w-48 xl:w-56 flex flex-col fixed inset-y-0">
         <div className="flex flex-col flex-grow bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
           {/* Sidebar Header */}
@@ -46,8 +56,8 @@ export default function Home() {
 
           <Separator />
 
-          {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 space-y-2">
+          {/* New Post Button */}
+          <div className="px-3 py-3">
             <Button
               variant="solid"
               size="default"
@@ -58,12 +68,12 @@ export default function Home() {
               <PlusCircle className="w-4 h-4" />
               <span>New Post</span>
             </Button>
-          </nav>
+          </div>
 
           <Separator />
 
           {/* User Section */}
-          <div className="px-3 py-3 space-y-2">
+          <div className="mt-auto px-3 py-3 space-y-2">
             {/* Credits Display */}
             <div className="flex items-center gap-2 px-2 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <CreditsDisplay />
@@ -88,7 +98,7 @@ export default function Home() {
         </div>
       </aside>
 
-      {/* Main Content */}
+      {/* Main Content Canvas */}
       <div className="flex-1 pl-48 xl:pl-56">
         <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto">

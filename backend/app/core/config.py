@@ -101,6 +101,10 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
     DEFAULT_LLM_MODEL: str = "claude-sonnet-4-20250514"
 
+    ## SendGrid Email Configuration
+    SENDGRID_API_KEY: str = ""
+    DEFAULT_EMAIL_SENDER: str = "noreply@gpt.social"
+
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
             message = (
