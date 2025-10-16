@@ -1,24 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { PlusCircle, Settings, Grid3x3, Calendar as CalendarIcon } from 'lucide-react'
-import { PostGallery } from '@/components/PostGallery'
-import { Calendar } from '@/components/preline/Calendar'
+import { PlusCircle, Settings, LayoutGrid } from 'lucide-react'
+import { StatsCards } from '@/components/StatsCards'
+import { RecentPosts } from '@/components/RecentPosts'
 import { UserProfile } from '@/components/UserProfile'
 import { CreditsDisplay } from '@/components/CreditsDisplay'
 import { useCreatePost } from '@/hooks/useCreatePost'
-import { usePosts } from '@/hooks/usePosts'
 import { Button } from '@/components/preline/Button'
 import { Separator } from '@/components/ui/separator'
-import { useState } from 'react'
 import { useCopilotReadable } from '@copilotkit/react-core'
-type ViewMode = 'grid' | 'calendar'
 
 export default function Home() {
   const router = useRouter()
   const createPostMutation = useCreatePost()
-  const { data: posts = [] } = usePosts()
-  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   // Make page context readable to the AI agent
   useCopilotReadable({
@@ -76,6 +71,19 @@ export default function Home() {
             </Button>
           </div>
 
+          {/* All Posts Link */}
+          <div className="px-3 py-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2"
+              onClick={() => router.push('/posts')}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>All Posts</span>
+            </Button>
+          </div>
+
           <Separator />
 
           {/* User Section */}
@@ -108,55 +116,28 @@ export default function Home() {
       <div className="flex-1 pl-48 xl:pl-56">
         <main className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto">
-            <div className="space-y-4 sm:space-y-6">
+            <div className="space-y-6">
+              {/* Header */}
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                    Your Posts
-                  </h2>
-                  {/* View Toggle */}
-                  <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode('grid')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                        viewMode === 'grid'
-                          ? 'bg-gray-700 text-white'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      <Grid3x3 className="w-4 h-4" />
-                      <span className="hidden sm:inline">Grid View</span>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('calendar')}
-                      className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                        viewMode === 'calendar'
-                          ? 'bg-gray-700 text-white'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      <CalendarIcon className="w-4 h-4" />
-                      <span className="hidden sm:inline">Calendar View</span>
-                    </button>
-                  </div>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Dashboard
+                </h2>
                 <Button
                   variant="solid"
                   onClick={handleNewPost}
                   isLoading={createPostMutation.isPending}
-                  className="hidden sm:flex gap-2"
+                  className="gap-2"
                 >
                   <PlusCircle className="w-4 h-4" />
                   New Post
                 </Button>
               </div>
 
-              {/* Conditional rendering based on view mode */}
-              {viewMode === 'grid' ? (
-                <PostGallery />
-              ) : (
-                <Calendar posts={posts} />
-              )}
+              {/* Stats Cards */}
+              <StatsCards />
+
+              {/* Recent Posts */}
+              <RecentPosts limit={12} />
             </div>
           </div>
         </main>

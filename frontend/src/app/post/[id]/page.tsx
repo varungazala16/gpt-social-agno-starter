@@ -7,14 +7,16 @@ import { usePost } from '@/hooks/usePost'
 import { useUpdatePost } from '@/hooks/useUpdatePost'
 import { VideoUpload } from '@/components/VideoUpload'
 import { VideoRecorder } from '@/components/VideoRecorder'
-import { VideoPlayer } from '@/components/VideoPlayer'
+import { HoverVideoPreview } from '@/components/HoverVideoPreview'
+import { StatusButtons } from '@/components/StatusButtons'
+import { PostStats } from '@/components/PostStats'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { createClient } from '@/lib/supabase/client'
-import { addVideoToPost, removeVideoFromPost, updatePost, type PostStatus } from '@/actions/post'
+import { addVideoToPost, removeVideoFromPost, updatePost, deletePost, type PostStatus } from '@/actions/post'
 import { useQueryClient } from '@tanstack/react-query'
 
 type ViewMode = 'view' | 'upload' | 'record'
@@ -146,6 +148,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     router.push(`/post/${postId}/edit/${index}`)
   }
 
+  const handleDeletePost = async () => {
+    if (!postId) return
+    if (confirm('Delete this post? This action cannot be undone.')) {
+      const result = await deletePost(postId)
+      if (result.success) {
+        router.push('/')
+      }
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
@@ -179,45 +191,40 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/')}
-              className="gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back
-            </Button>
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => router.push('/')}
+                className="gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </Button>
 
-            <div className="flex items-center gap-3">
-              <select
-                value={status}
-                onChange={(e) => {
-                  const newStatus = e.target.value as PostStatus
+              <StatusButtons
+                currentStatus={status}
+                onStatusChange={(newStatus) => {
                   setStatus(newStatus)
                   debouncedSave(caption, newStatus, publishedDate)
                 }}
-                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-sm"
-              >
-                <option value="draft">Draft</option>
-                <option value="scheduled">Scheduled</option>
-                <option value="posted">Posted</option>
-              </select>
+                canPublish={!!(caption && publishedDate && post.assets && post.assets.length > 0)}
+              />
+            </div>
 
-              {/* Saving indicator */}
-              <div className="flex items-center gap-2 text-sm">
-                {isSaving && (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
-                    <span className="text-gray-500">Saving...</span>
-                  </>
-                )}
-                {showSaved && !isSaving && (
-                  <>
-                    <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
-                    <span className="text-green-600 dark:text-green-400">Saved</span>
-                  </>
-                )}
-              </div>
+            {/* Saving indicator */}
+            <div className="flex items-center gap-2 text-sm">
+              {isSaving && (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-gray-500" />
+                  <span className="text-gray-500">Saving...</span>
+                </>
+              )}
+              {showSaved && !isSaving && (
+                <>
+                  <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-green-600 dark:text-green-400">Saved</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -271,6 +278,9 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
+          {/* Post Stats - Only show when published */}
+          {status === 'posted' && <PostStats />}
+
           <Separator />
 
           {/* Videos Section */}
@@ -317,23 +327,10 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     {videoUrls.map(({ path, url }, index) => (
                       <div key={path} className="relative group border border-gray-200 dark:border-gray-800 rounded-lg overflow-hidden">
                         <div className="aspect-video bg-gray-100 dark:bg-gray-800">
-                          <VideoPlayer src={url} />
-                        </div>
-                        <div className="p-3 flex gap-2">
-                          <button
-                            onClick={() => handleEditVideo(index)}
-                            className="flex-1 flex items-center justify-center gap-1.5 p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950 rounded-md transition-colors text-sm font-medium"
-                          >
-                            <Film className="w-4 h-4" />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            onClick={() => handleRemoveVideo(path)}
-                            className="flex-1 flex items-center justify-center gap-1.5 p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-md transition-colors text-sm font-medium"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Remove</span>
-                          </button>
+                          <HoverVideoPreview
+                            src={url}
+                            onClick={() => router.push(`/post/${postId}/${index}`)}
+                          />
                         </div>
                       </div>
                     ))}
@@ -367,6 +364,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                 </Button>
               </div>
             )}
+          </div>
+
+          {/* Delete Post */}
+          <div className="flex justify-end">
+            <Button
+              variant="destructive"
+              onClick={handleDeletePost}
+              className="gap-2"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete Post
+            </Button>
           </div>
         </div>
       </main>

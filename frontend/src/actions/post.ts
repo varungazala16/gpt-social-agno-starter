@@ -95,6 +95,63 @@ export async function getPosts() {
   }
 }
 
+export async function getFilteredPosts(filters?: {
+  status?: PostStatus
+  search?: string
+  from?: string
+  to?: string
+}) {
+  try {
+    const supabase = await createClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return { success: false, error: 'Not authenticated', posts: [] }
+    }
+
+    let query = supabase
+      .from('post')
+      .select('*')
+      .eq('user_id', user.id)
+
+    // Apply status filter
+    if (filters?.status) {
+      query = query.eq('status', filters.status)
+    }
+
+    // Apply search filter (searches in caption)
+    if (filters?.search) {
+      query = query.ilike('caption', `%${filters.search}%`)
+    }
+
+    // Apply date range filters
+    if (filters?.from) {
+      query = query.gte('created_at', filters.from)
+    }
+    if (filters?.to) {
+      query = query.lte('created_at', filters.to)
+    }
+
+    // Order by created_at descending
+    query = query.order('created_at', { ascending: false })
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Get filtered posts error:', error)
+      return { success: false, error: error.message, posts: [] }
+    }
+
+    return { success: true, posts: (data as Post[]) || [] }
+  } catch (error) {
+    console.error('Get filtered posts error:', error)
+    return { success: false, error: 'Failed to fetch posts', posts: [] }
+  }
+}
+
 export async function getPost(id: string) {
   try {
     const supabase = await createClient()
