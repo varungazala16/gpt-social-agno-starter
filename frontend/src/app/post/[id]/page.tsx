@@ -44,8 +44,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     path: ''
   })
 
-  const saveTimeoutRef = useRef<NodeJS.Timeout>()
-  const savedTimeoutRef = useRef<NodeJS.Timeout>()
+  const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
 
   useEffect(() => {
     params.then(({ id }) => setPostId(id))

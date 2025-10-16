@@ -1,18 +1,24 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { PlusCircle, Settings } from 'lucide-react'
+import { PlusCircle, Settings, Grid3x3, Calendar as CalendarIcon } from 'lucide-react'
 import { PostGallery } from '@/components/PostGallery'
+import { Calendar } from '@/components/preline/Calendar'
 import { UserProfile } from '@/components/UserProfile'
 import { CreditsDisplay } from '@/components/CreditsDisplay'
 import { useCreatePost } from '@/hooks/useCreatePost'
+import { usePosts } from '@/hooks/usePosts'
 import { Button } from '@/components/preline/Button'
 import { Separator } from '@/components/ui/separator'
+import { useState } from 'react'
 import { useCopilotReadable } from '@copilotkit/react-core'
+type ViewMode = 'grid' | 'calendar'
 
 export default function Home() {
   const router = useRouter()
   const createPostMutation = useCreatePost()
+  const { data: posts = [] } = usePosts()
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
 
   // Make page context readable to the AI agent
   useCopilotReadable({
@@ -104,9 +110,36 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                  Your Posts
-                </h2>
+                <div className="flex items-center gap-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                    Your Posts
+                  </h2>
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-1 bg-gray-800 rounded-lg p-1">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                        viewMode === 'grid'
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      <Grid3x3 className="w-4 h-4" />
+                      <span className="hidden sm:inline">Grid View</span>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('calendar')}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                        viewMode === 'calendar'
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-400 hover:text-gray-300'
+                      }`}
+                    >
+                      <CalendarIcon className="w-4 h-4" />
+                      <span className="hidden sm:inline">Calendar View</span>
+                    </button>
+                  </div>
+                </div>
                 <Button
                   variant="solid"
                   onClick={handleNewPost}
@@ -117,7 +150,13 @@ export default function Home() {
                   New Post
                 </Button>
               </div>
-              <PostGallery />
+
+              {/* Conditional rendering based on view mode */}
+              {viewMode === 'grid' ? (
+                <PostGallery />
+              ) : (
+                <Calendar posts={posts} />
+              )}
             </div>
           </div>
         </main>
