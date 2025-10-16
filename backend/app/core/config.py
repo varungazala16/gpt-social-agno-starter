@@ -96,6 +96,10 @@ class Settings(BaseSettings):
     YOUTUBE_CLIENT_SECRET: str = ""
     YOUTUBE_REDIRECT_URI: str = ""
 
+    # Notification Settings
+    SENDGRID_API_KEY: str = ""
+    DEFAULT_EMAIL_SENDER: str = ""
+
     ## AI Configuration
     OPENAI_API_KEY: str = ""
     ANTHROPIC_API_KEY: str = ""

@@ -103,28 +103,4 @@ class SendgridClient:
             for recipient in recipients
         ]
         results = await asyncio.gather(*tasks)
-        return dict(zip(recipients, results, strict=False))
-
-    async def send_welcome_email(
-        self,
-        to_email: str,
-        data: WelcomeEmailData,
-        from_email: str | None = None,
-    ) -> bool:
-        """
-        Send a welcome email to a new user.
-
-        Args:
-            to_email: Recipient email address
-            data: Welcome email template data (name, cta_link)
-            from_email: Sender email address. Defaults to self.default_sender
-
-        Returns:
-            True if email was sent successfully, False otherwise
-        """
-        return await self.send_template_email(
-            to_email=to_email,
-            template_id=WELCOME_EMAIL_TEMPLATE,
-            dynamic_template_data=dict(data),
-            from_email=from_email,
-        )
+        return dict(zip(recipients, results))

@@ -8,7 +8,7 @@ All endpoints are protected by OIDC authentication configured in Cloud Run.
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from app.api.jobs import credits, test
+from app.api.jobs import credits, notifications, test
 from app.core.config import settings
 
 app = FastAPI(
@@ -22,6 +22,7 @@ app = FastAPI(
 # Include job routers
 app.include_router(test.router, prefix="/jobs", tags=["jobs"])
 app.include_router(credits.router, prefix="/jobs", tags=["jobs", "credits"])
+app.include_router(notifications.router, prefix="/jobs", tags=["jobs", "notifications"])
 
 
 @app.get("/")
