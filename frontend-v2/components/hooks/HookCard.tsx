@@ -4,9 +4,7 @@ import { useState } from 'react'
 import { ChevronDown, ChevronUp, MessageCircle, Bookmark } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Hook, HookType } from '@/types'
-
-const hookTypes: HookType[] = ['Video Concept', 'Opening Line', 'Story Hook', 'Tutorial Hook']
+import { Hook } from '@/types'
 
 interface HookCardProps {
   hook: Hook
@@ -18,7 +16,6 @@ interface HookCardProps {
 export function HookCard({ hook, onDismiss, onToggleSave, defaultExpanded = false }: HookCardProps) {
   const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
-  const [currentType, setCurrentType] = useState(hook.type)
 
   function handleWriteScript() {
     router.push(`/chat?prompt=${encodeURIComponent(`Write a script for: ${hook.text}`)}`)
@@ -75,7 +72,7 @@ export function HookCard({ hook, onDismiss, onToggleSave, defaultExpanded = fals
             onClick={() => setIsExpanded(!isExpanded)}
             className="w-full flex items-center justify-between bg-background border border-border rounded-lg px-4 py-2 hover:bg-secondary transition-colors"
           >
-            <span className="text-foreground">{currentType}</span>
+            <span className="text-foreground">{hook.type}</span>
             {isExpanded ? (
               <ChevronUp className="w-4 h-4 text-muted-foreground" />
             ) : (
@@ -85,7 +82,7 @@ export function HookCard({ hook, onDismiss, onToggleSave, defaultExpanded = fals
         )}
         {!hook.details && (
           <div className="bg-background border border-border rounded-lg px-4 py-2">
-            <span className="text-foreground">{currentType}</span>
+            <span className="text-foreground">{hook.type}</span>
           </div>
         )}
 

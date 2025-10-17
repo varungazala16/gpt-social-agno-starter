@@ -8,12 +8,6 @@ interface AnalyticsChartProps {
   platforms?: Platform[]
 }
 
-const platformColors = {
-  instagram: 'oklch(0.7 0.25 340)', // Pink
-  tiktok: 'oklch(0.65 0.25 180)', // Cyan
-  youtube: 'oklch(0.65 0.25 30)', // Red
-}
-
 const platformIcons: Record<Platform, string> = {
   instagram: '📷',
   tiktok: '🎵',

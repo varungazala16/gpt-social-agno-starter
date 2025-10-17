@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SocialAccount, Platform } from '@/types'
 import { getAccounts, toggleAccountSelection } from '@/lib/api/mock-accounts'
-import { cn } from '@/lib/utils'
 
 const platformIcons: Record<Platform, string> = {
   instagram: '📷',
@@ -33,19 +32,14 @@ function formatFollowers(count: number): string {
 export function AccountSelector() {
   const router = useRouter()
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     loadAccounts()
   }, [])
 
   async function loadAccounts() {
-    try {
-      const data = await getAccounts()
-      setAccounts(data)
-    } finally {
-      setIsLoading(false)
-    }
+    const data = await getAccounts()
+    setAccounts(data)
   }
 
   async function handleToggleAccount(accountId: string) {

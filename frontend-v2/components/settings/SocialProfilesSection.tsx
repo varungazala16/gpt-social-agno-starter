@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { SocialAccount, Platform } from '@/types'
 import { getAccounts, deleteAccount, addAccount } from '@/lib/api/mock-accounts'
 import { AddSocialProfileModal } from '@/components/modals/AddSocialProfileModal'

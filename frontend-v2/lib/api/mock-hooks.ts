@@ -1,4 +1,4 @@
-import { Hook, HookType } from '@/types'
+import { Hook } from '@/types'
 
 const mockHooks: Hook[] = [
   {

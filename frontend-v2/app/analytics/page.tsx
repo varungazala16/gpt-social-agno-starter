@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AccountSelector } from '@/components/AccountSelector'
 import { TimeRangeSelector } from '@/components/analytics/TimeRangeSelector'
@@ -24,7 +24,7 @@ function getScoreColor(score: number): string {
   return 'text-red-500'
 }
 
-export default function AnalyticsPage() {
+function AnalyticsContent() {
   const searchParams = useSearchParams()
   const postId = searchParams.get('postId')
 
@@ -37,6 +37,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     loadData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId, timeRange])
 
   async function loadData() {
@@ -237,5 +238,25 @@ export default function AnalyticsPage() {
         ) : null}
       </main>
     </div>
+  )
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen">
+        <header className="border-b border-border bg-card sticky top-0 z-10">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+            <AccountSelector />
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-6">
+          <div className="text-center py-12 text-muted-foreground">Loading analytics...</div>
+        </main>
+      </div>
+    }>
+      <AnalyticsContent />
+    </Suspense>
   )
 }

@@ -1,4 +1,4 @@
-import { VideoReview, VideoAnalysis, FeedbackItem } from '@/types'
+import { VideoReview, FeedbackItem } from '@/types'
 
 const mockFeedback: FeedbackItem[] = [
   {
@@ -53,7 +53,7 @@ export interface AnalysisUpdate {
   issuesCount?: number
 }
 
-export async function* analyzeVideo(videoId: string): AsyncGenerator<AnalysisUpdate> {
+export async function* analyzeVideo(_videoId: string): AsyncGenerator<AnalysisUpdate> {
   // Simulate analysis with progressive updates
 
   // First update: Hook score (after 1.5s)

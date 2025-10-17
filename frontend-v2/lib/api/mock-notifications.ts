@@ -39,7 +39,7 @@ export async function getNotificationSettings(): Promise<NotificationSettings> {
       try {
         const parsed = JSON.parse(saved)
         currentPreferences = parsed.preferences
-      } catch (e) {
+      } catch {
         // Ignore parse errors
       }
     }

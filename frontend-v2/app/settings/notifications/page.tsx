@@ -57,7 +57,7 @@ export default function NotificationsPage() {
                 Email Notifications
               </h2>
               <p className="text-sm text-muted-foreground">
-                Choose which emails you'd like to receive from SocialGPT
+                Choose which emails you&apos;d like to receive from SocialGPT
               </p>
             </div>
 

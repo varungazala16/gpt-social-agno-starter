@@ -150,7 +150,7 @@ export async function getPostAnalytics(postId: string): Promise<Post> {
   }
 }
 
-export async function getPostInsights(postId: string): Promise<InsightItem[]> {
+export async function getPostInsights(_postId: string): Promise<InsightItem[]> {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300))
 

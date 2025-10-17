@@ -67,7 +67,7 @@ export default function HooksPage() {
       <main className="container mx-auto px-4 py-6 space-y-6 max-w-3xl">
         {/* Today's Hook Section */}
         <div className="space-y-3">
-          <h2 className="text-2xl font-bold text-foreground">Today's Hook</h2>
+          <h2 className="text-2xl font-bold text-foreground">Today&apos;s Hook</h2>
           {isLoading ? (
             <div className="bg-card border border-border rounded-lg p-6 text-center text-muted-foreground">
               Loading hook...
