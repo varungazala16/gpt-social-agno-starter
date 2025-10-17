@@ -1,11 +1,15 @@
-import { Goal, GrowthDataPoint } from '@/types'
-import { subDays, format } from 'date-fns'
+import { Goal, GrowthDataPoint, GoalMetric } from '@/types'
+import { subDays, format, addDays } from 'date-fns'
 
 const mockGoal: Goal = {
-  targetFollowers: 20000,
-  currentFollowers: 15646,
+  metric: 'followers',
+  targetValue: 20000,
+  currentValue: 15646,
   todayGrowth: 122,
   percentComplete: 78,
+  // Legacy fields
+  targetFollowers: 20000,
+  currentFollowers: 15646,
 }
 
 // Generate 30 days of growth data
@@ -36,9 +40,56 @@ export async function getGrowthData(): Promise<GrowthDataPoint[]> {
   return generateGrowthData()
 }
 
-export async function updateGoal(targetFollowers: number): Promise<Goal> {
+export async function updateGoal(metric: GoalMetric, targetValue: number): Promise<Goal> {
   await new Promise(resolve => setTimeout(resolve, 400))
-  mockGoal.targetFollowers = targetFollowers
-  mockGoal.percentComplete = Math.round((mockGoal.currentFollowers / targetFollowers) * 100)
+  mockGoal.metric = metric
+  mockGoal.targetValue = targetValue
+
+  // Update current value based on metric
+  const metrics = await getMetrics()
+  mockGoal.currentValue = metrics[metric]
+
+  // Update percent complete
+  mockGoal.percentComplete = Math.round((mockGoal.currentValue / targetValue) * 100)
+
+  // Update legacy fields if metric is followers
+  if (metric === 'followers') {
+    mockGoal.targetFollowers = targetValue
+    mockGoal.currentFollowers = mockGoal.currentValue
+  }
+
   return mockGoal
+}
+
+export async function getMetrics(): Promise<{ followers: number; views: number; likes: number }> {
+  await new Promise(resolve => setTimeout(resolve, 200))
+  return {
+    followers: mockGoal.currentFollowers,
+    views: 450000,
+    likes: 28500,
+  }
+}
+
+export function calculatePredictedDate(
+  current: number,
+  target: number,
+  dailyGrowth: number
+): Date {
+  if (dailyGrowth <= 0 || current >= target) {
+    return new Date() // Already reached or no growth
+  }
+
+  const remaining = target - current
+  const daysToReach = Math.ceil(remaining / dailyGrowth)
+
+  return addDays(new Date(), daysToReach)
+}
+
+export function getSuggestedTarget(goal: Goal): number {
+  // If goal is reached (or close to it), suggest 20% higher
+  if (goal.percentComplete >= 100) {
+    return Math.ceil(goal.currentValue * 1.2)
+  }
+  // Otherwise, keep current target
+  return goal.targetValue
 }

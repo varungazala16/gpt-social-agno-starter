@@ -1,6 +1,5 @@
 import { AccountSelector } from '@/components/AccountSelector'
 import { GoalCard } from '@/components/home/GoalCard'
-import { FollowerGrowthChart } from '@/components/home/FollowerGrowthChart'
 import { NextHookCard } from '@/components/home/NextHookCard'
 import { PostCoachSection } from '@/components/home/PostCoachSection'
 
@@ -22,11 +21,8 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-foreground">Good Morning, Nikhil</h2>
         </div>
 
-        {/* Goal Section */}
+        {/* Goal Section with Integrated Chart */}
         <GoalCard />
-
-        {/* Growth Chart */}
-        <FollowerGrowthChart />
 
         {/* Next Hook */}
         <NextHookCard />

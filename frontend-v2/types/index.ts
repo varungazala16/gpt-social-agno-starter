@@ -14,11 +14,17 @@ export interface SocialAccount {
 }
 
 // Goal data
+export type GoalMetric = 'followers' | 'views' | 'likes'
+
 export interface Goal {
-  targetFollowers: number
-  currentFollowers: number
+  metric: GoalMetric
+  targetValue: number
+  currentValue: number
   todayGrowth: number
   percentComplete: number
+  // Legacy fields for followers (kept for backward compatibility)
+  targetFollowers: number
+  currentFollowers: number
 }
 
 // Growth data point for charts

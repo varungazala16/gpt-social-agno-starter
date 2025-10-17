@@ -19,8 +19,8 @@ export default function SettingsPage() {
 
   const supportItems: SettingsListItem[] = [
     {
-      label: 'Call a Founder',
-      href: 'mailto:support@gpt.social',
+      label: 'Email a Founder',
+      href: 'mailto:nikhil@gpt.social',
       external: true,
     },
     {
