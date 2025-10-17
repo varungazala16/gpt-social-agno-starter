@@ -137,10 +137,11 @@ export function CardPost({
               <button
                 onClick={onEdit}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 p-2',
-                  'bg-blue-600 hover:bg-blue-700 text-white',
-                  'rounded-md text-sm transition-colors',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
+                  'flex-1 flex items-center justify-center gap-1.5 px-3 py-2',
+                  'bg-primary hover:bg-primary/90 text-white',
+                  'rounded-md text-sm font-medium transition-smooth',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                  'dark:focus-visible:ring-offset-gray-900'
                 )}
                 aria-label="Edit post"
                 title="Edit post"
@@ -155,17 +156,19 @@ export function CardPost({
                 onClick={onDelete}
                 disabled={isDeleting}
                 className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 p-2',
-                  'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950',
-                  'rounded-md transition-colors text-sm font-medium',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2',
+                  'flex-1 flex items-center justify-center gap-1.5 px-3 py-2',
+                  'bg-transparent text-negative hover:bg-negative/10',
+                  'border border-negative/20 hover:border-negative',
+                  'rounded-md text-sm font-medium transition-smooth',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-negative focus-visible:ring-offset-2',
+                  'dark:focus-visible:ring-offset-gray-900',
                   isDeleting && 'opacity-50 cursor-not-allowed'
                 )}
                 aria-label="Delete post"
                 title="Delete post"
               >
                 {isDeleting ? (
-                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-negative border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Trash2 className="w-4 h-4" />

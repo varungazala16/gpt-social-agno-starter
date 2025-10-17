@@ -45,6 +45,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     isOpen: false,
     path: ''
   })
+  const [deletePostDialog, setDeletePostDialog] = useState(false)
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
   const savedTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -148,13 +149,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
     router.push(`/post/${postId}/edit/${index}`)
   }
 
-  const handleDeletePost = async () => {
+  const handleDeletePost = () => {
+    setDeletePostDialog(true)
+  }
+
+  const confirmDeletePost = async () => {
     if (!postId) return
-    if (confirm('Delete this post? This action cannot be undone.')) {
-      const result = await deletePost(postId)
-      if (result.success) {
-        router.push('/')
-      }
+    setDeletePostDialog(false)
+    const result = await deletePost(postId)
+    if (result.success) {
+      // Invalidate the posts query so the home page refreshes
+      queryClient.invalidateQueries({ queryKey: ['posts'] })
+      router.push('/')
     }
   }
 
@@ -387,6 +393,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
         title="Remove Video"
         message="Are you sure you want to remove this video from the post? This action cannot be undone."
         confirmText="Remove"
+        variant="danger"
+      />
+
+      <ConfirmDialog
+        isOpen={deletePostDialog}
+        onClose={() => setDeletePostDialog(false)}
+        onConfirm={confirmDeletePost}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone and all associated videos will be removed."
+        confirmText="Delete"
         variant="danger"
       />
     </div>

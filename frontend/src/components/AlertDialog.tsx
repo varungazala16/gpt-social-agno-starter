@@ -1,6 +1,7 @@
 'use client'
 
 import { Modal } from './Modal'
+import { Button } from './ui/button'
 
 interface AlertDialogProps {
   isOpen: boolean
@@ -10,19 +11,19 @@ interface AlertDialogProps {
   variant?: 'info' | 'error' | 'success'
 }
 
-export function AlertDialog({ isOpen, onClose, title = 'Alert', message }: AlertDialogProps) {
+export function AlertDialog({ isOpen, onClose, message }: AlertDialogProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={title} className="max-w-md">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md rounded-lg shadow-xl">
       <div className="p-4">
-        <p className="text-sm">{message}</p>
-      </div>
-      <div className="mt-4 flex justify-end">
-        <button
-          onClick={onClose}
-          className="px-4 py-2 bg-blue-600"
-        >
-          OK
-        </button>
+        <p className="text-sm text-gray-900 dark:text-gray-100">{message}</p>
+        <div className="mt-4 flex justify-end">
+          <Button
+            variant="primary"
+            onClick={onClose}
+          >
+            OK
+          </Button>
+        </div>
       </div>
     </Modal>
   )

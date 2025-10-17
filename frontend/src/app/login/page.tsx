@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -65,31 +68,43 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-subtle-prime/30 to-primary/5 dark:from-gray-950 dark:via-gray-900 dark:to-primary/10 px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white p-8">
-          <h1 className="text-3xl mb-2">
+        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl p-8 border border-gray-200 dark:border-gray-800">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 relative">
+              <Image
+                src="/logo.png"
+                alt="GPT Social"
+                width={80}
+                height={80}
+                className="object-contain"
+              />
+            </div>
+          </div>
+
+          <h1 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-2">
             Welcome Back
           </h1>
-          <p className="mb-6">
-            Sign in to your Video Studio account
+          <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
+            Sign in to GPT Social
           </p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm mb-1"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
               >
                 Email
               </label>
-              <input
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 border bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="you@example.com"
               />
             </div>
@@ -97,31 +112,31 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm mb-1"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
               >
                 Password
               </label>
-              <input
+              <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-3 py-2 border bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50">
-                <p className="text-sm">{error}</p>
+              <div className="p-3 bg-negative/10 dark:bg-negative/20 border border-negative/20 rounded-lg">
+                <p className="text-sm text-negative dark:text-negative-light">{error}</p>
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full"
+              variant="solid"
             >
               {isLoading ? (
                 <>
@@ -131,26 +146,27 @@ export default function LoginPage() {
               ) : (
                 'Sign In'
               )}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t "></div>
+                <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2  ">
+                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
                   Or continue with
                 </span>
               </div>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading || isLoading}
-              className="mt-4 w-full  border  dark:hover:bg-gray-600 text-gray-900 dark:text-white  py-2 px-4 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              variant="outline"
+              className="mt-4 w-full"
             >
               {isGoogleLoading ? (
                 <>
@@ -180,15 +196,15 @@ export default function LoginPage() {
                   Sign in with Google
                 </>
               )}
-            </button>
+            </Button>
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm ">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Don&apos;t have an account?{' '}
               <Link
                 href="/signup"
-                className=" hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 "
+                className="text-primary hover:text-primary/90 dark:text-primary-light dark:hover:text-primary font-medium transition-smooth"
               >
                 Sign up
               </Link>

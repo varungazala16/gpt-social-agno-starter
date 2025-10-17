@@ -152,9 +152,11 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
                 disabled={saveMutation.isPending}
                 className={cn(
                   'flex items-center justify-center gap-3 px-8 py-4 rounded-xl',
-                  'bg-red-600 hover:bg-red-700 text-white font-medium',
-                  'transition-all duration-200 ease-in-out transform hover:scale-105',
+                  'bg-negative hover:bg-negative/90 text-white font-medium',
+                  'transition-smooth transform hover:scale-105',
                   'shadow-lg hover:shadow-xl',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-negative focus-visible:ring-offset-2',
+                  'dark:focus-visible:ring-offset-gray-900',
                   'disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
                 )}
               >
@@ -174,7 +176,15 @@ export function VideoRecorder({ onRecordingComplete, className }: VideoRecorderP
               </div>
               <button
                 onClick={stopRecording}
-                className="flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-medium transition-all duration-200 ease-in-out transform hover:scale-105 shadow-lg hover:shadow-xl"
+                className={cn(
+                  'flex items-center justify-center gap-3 px-8 py-4 rounded-xl',
+                  'bg-gray-800 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600',
+                  'text-white font-medium',
+                  'transition-smooth transform hover:scale-105',
+                  'shadow-lg hover:shadow-xl',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-600 focus-visible:ring-offset-2',
+                  'dark:focus-visible:ring-offset-gray-900'
+                )}
               >
                 <div className="w-6 h-6 rounded bg-white/20 flex items-center justify-center">
                   <Square className="w-4 h-4" />

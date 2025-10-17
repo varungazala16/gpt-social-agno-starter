@@ -1,18 +1,16 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface ModalProps {
   isOpen: boolean
   onClose: () => void
-  title?: string
   children: React.ReactNode
   className?: string
 }
 
-export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
+export function Modal({ isOpen, onClose, children, className }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -43,27 +41,11 @@ export function Modal({ isOpen, onClose, title, children, className }: ModalProp
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white',
+          'relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900',
           className
         )}
       >
-        <div className="sticky top-0 bg-white px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between z-10">
-          {title && (
-            <h2 className="text-lg sm:text-xl">
-              {title}
-            </h2>
-          )}
-          <button
-            onClick={onClose}
-            className="ml-auto p-2"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="p-4 sm:p-6">
-          {children}
-        </div>
+        {children}
       </div>
     </div>
   )

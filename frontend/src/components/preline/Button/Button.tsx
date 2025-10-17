@@ -16,68 +16,80 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // Solid - Primary blue button (Preline solid style)
+        // Solid - Primary button using design system primary color
         solid:
           cn(
-            'bg-blue-600 text-white shadow-sm',
-            'hover:bg-blue-700',
-            'focus-visible:ring-blue-600',
-            'dark:bg-blue-600 dark:hover:bg-blue-700'
+            'bg-primary text-white shadow-sm',
+            'hover:bg-primary/90',
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Primary - Semantic primary using theme colors
+        // Primary - Same as solid for consistency
         primary:
           cn(
-            'bg-primary text-primary-foreground shadow-sm',
+            'bg-primary text-white shadow-sm',
             'hover:bg-primary/90',
-            'focus-visible:ring-primary'
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Destructive - Danger/delete actions
+        // Destructive - Danger/delete actions using design system negative color
         destructive:
           cn(
-            'bg-red-600 text-white shadow-sm',
-            'hover:bg-red-700',
-            'focus-visible:ring-red-600',
-            'dark:bg-red-700 dark:hover:bg-red-800'
+            'bg-negative text-white shadow-sm',
+            'hover:bg-negative/90',
+            'focus-visible:ring-negative focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Outline - Secondary actions (Preline outline style)
+        // Outline - Secondary actions
         outline:
           cn(
-            'border-2 border-gray-300 bg-transparent',
+            'border-2 border-gray-300 dark:border-gray-700 bg-transparent',
             'text-gray-700 dark:text-gray-300',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'hover:border-gray-400 dark:hover:border-gray-600',
-            'focus-visible:ring-gray-600'
+            'hover:border-primary dark:hover:border-primary',
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
         // Secondary - Soft gray background
         secondary:
           cn(
             'bg-gray-100 text-gray-900',
             'hover:bg-gray-200',
-            'focus-visible:ring-gray-600',
-            'dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700'
+            'focus-visible:ring-gray-600 focus-visible:ring-offset-2',
+            'dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Ghost - Minimal style (Preline ghost style)
+        // Ghost - Minimal style
         ghost:
           cn(
             'text-gray-700 dark:text-gray-300',
             'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'focus-visible:ring-gray-600'
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Soft - Subtle with color (Preline soft style)
+        // Soft - Subtle with primary color
         soft:
           cn(
-            'bg-blue-50 text-blue-600',
-            'hover:bg-blue-100',
-            'focus-visible:ring-blue-600',
-            'dark:bg-blue-950 dark:text-blue-400 dark:hover:bg-blue-900'
+            'bg-subtle-prime text-primary',
+            'hover:bg-primary/10',
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:bg-primary/10 dark:hover:bg-primary/20',
+            'dark:focus-visible:ring-offset-gray-900',
+            'transition-smooth'
           ),
-        // Link - Text link style (Preline link style)
+        // Link - Text link style with primary color
         link:
           cn(
-            'text-blue-600 underline-offset-4',
+            'text-primary underline-offset-4',
             'hover:underline',
-            'focus-visible:ring-blue-600',
-            'dark:text-blue-400'
+            'focus-visible:ring-primary focus-visible:ring-offset-2',
+            'dark:focus-visible:ring-offset-gray-900'
           ),
       },
       size: {

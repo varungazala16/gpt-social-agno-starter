@@ -57,14 +57,18 @@ export function ConfirmDialog({
   const variantStyles = getVariantStyles()
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-md bg-white dark:bg-gray-900 rounded-lg shadow-xl">
-      <div className="p-6">
-        <div className="flex items-start gap-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-md rounded-lg shadow-xl"
+    >
+      <div className="p-4">
+        <div className="flex items-start gap-3">
           <div className={`flex-shrink-0 p-2 rounded-lg ${variantStyles.iconBg}`}>
             {variantStyles.icon}
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
               {title}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-300">
@@ -73,7 +77,7 @@ export function ConfirmDialog({
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className="mt-4 flex justify-end gap-2">
           <Button
             variant="outline"
             onClick={onClose}

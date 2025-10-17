@@ -352,7 +352,7 @@ export function VideoEditorModal({
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="Edit Video">
+      <Modal isOpen={isOpen} onClose={onClose}>
         <div className={cn('w-full', className)}>
           {/* Aspect Ratio Selector */}
           <div className="mb-3">

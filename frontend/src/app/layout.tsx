@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { CopilotKit } from "@copilotkit/react-core";
 import PrelineScriptWrapper from "@/components/PrelineScriptWrapper";
 import { LayoutContent } from "./layout-content";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 export const metadata: Metadata = {
   title: "Video App - GPT Social",
@@ -19,14 +20,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="font-sans">
-        <CopilotKit runtimeUrl="/api/copilotkit" agent="copilotAgent">
-          <Providers>
-            <LayoutContent>{children}</LayoutContent>
-          </Providers>
-        </CopilotKit>
-        <Toaster />
-        <PrelineScriptWrapper />
+      <body className="font-outfit antialiased">
+        <ThemeProvider>
+          <CopilotKit runtimeUrl="/api/copilotkit" agent="copilotAgent">
+            <Providers>
+              <LayoutContent>{children}</LayoutContent>
+            </Providers>
+          </CopilotKit>
+          <Toaster />
+          <PrelineScriptWrapper />
+        </ThemeProvider>
       </body>
     </html>
   );
