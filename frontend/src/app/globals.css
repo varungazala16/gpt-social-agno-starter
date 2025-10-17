@@ -74,3 +74,30 @@
 /* Defaults hover styles on all devices */
 @custom-variant hover (&:hover);
 
+/* CopilotKit Theme Overrides */
+@layer components {
+  /* Light mode (default) */
+  :root {
+    --copilot-kit-primary-color: #0ea5e9;
+    --copilot-kit-background-color: #ffffff;
+    --copilot-kit-secondary-background-color: #f9fafb;
+    --copilot-kit-contrast-color: #111827;
+    --copilot-kit-secondary-contrast-color: #6b7280;
+    --copilot-kit-separator-color: #e5e7eb;
+    --copilot-kit-response-button-background-color: #f3f4f6;
+    --copilot-kit-response-button-color: #374151;
+  }
+
+  /* Dark mode */
+  .dark {
+    --copilot-kit-primary-color: #0ea5e9;
+    --copilot-kit-background-color: #111827;
+    --copilot-kit-secondary-background-color: #1f2937;
+    --copilot-kit-contrast-color: #f9fafb;
+    --copilot-kit-secondary-contrast-color: #9ca3af;
+    --copilot-kit-separator-color: #374151;
+    --copilot-kit-response-button-background-color: #374151;
+    --copilot-kit-response-button-color: #e5e7eb;
+  }
+}
+

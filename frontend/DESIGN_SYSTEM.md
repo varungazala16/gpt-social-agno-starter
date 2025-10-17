@@ -1,4 +1,4 @@
-# Post Studio Design System
+# GPT Social Design System
 
 **Version:** 1.0.0
 **Framework:** Preline UI + Tailwind CSS
