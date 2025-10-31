@@ -1,8 +1,0 @@
-# mise configuration for GPT Social
-# https://mise.jdx.dev/
-
-[tools]
-node = "20"  # Node.js 20 LTS (compatible with Next.js 15.5)
-
-[settings]
-experimental = true
